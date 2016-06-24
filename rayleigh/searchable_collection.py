@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import \
     manhattan_distances, euclidean_distances, additive_chi2_kernel
-import pyflann
+import rayleigh.pyflann as pyflann
 from scipy.spatial import cKDTree
 
 import util

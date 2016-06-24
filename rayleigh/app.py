@@ -11,14 +11,15 @@ import sys
 import os
 from urllib2 import unquote
 
+
 repo_dirname = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, repo_dirname)
 import rayleigh
 import rayleigh.util as util
 
 app = Flask(__name__)
-app.debug = False  # TODO: make sure this is False in production
-#app.debug = True
+#app.debug = False  # TODO: make sure this is False in production
+app.debug = True
 
 
 def make_json_response(body, status_code=200):
@@ -113,6 +114,7 @@ def search_by_palette_default():
 @app.route('/search_by_palette/<sic_type>/<int:sigma>')
 def search_by_palette(sic_type, sigma):
     colors = parse_colors_and_values()
+    print colors
     return render_template(
         'search_by_palette.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
