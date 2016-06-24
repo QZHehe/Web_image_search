@@ -52,6 +52,10 @@ fname_dict = {
         'Euclidean, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
     'data/flickr_100K_flann_euclidean_16_0.pickle': (
         'Euclidean, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
+    'data/flickr_100K_CKDTree_manhattan_16_0.pickle': (
+        'Manhattan, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
+    'data/flickr_100K_CKDTree_euclidean_16_0.pickle': (
+        'Euclidean, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
 }
 
 sics = {}
