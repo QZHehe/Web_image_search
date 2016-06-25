@@ -16,3 +16,16 @@ function getObjectValues(object)
        values.push(object[property]);
      return values;
  }
+function addShowSelectedColor(color)
+{
+    $colorName=color.id.replace('#','')
+    $colorAdd = '<a id="show_'+$colorName+'"><span style="background-color: ';
+    $colorAdd+= color.id+' " /></a> '
+    $('#show_select_colors').append($colorAdd);
+}
+function deleteShowSelectedColor(color)
+{
+    $colorName=color.id.replace('#','')
+    $colorDelete='show_'+$colorName;
+    $('#'+$colorDelete).remove();
+}
