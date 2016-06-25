@@ -100,10 +100,11 @@ def parse_colors_and_values():
     colors = unquote(colors).split(',')
 
     values = request.args.get('values', '')
+
     if len(values) < 1:
         values = np.ones(len(colors), 'float') / len(colors)
     else:
-        values = np.array(unquote(values).split(','), 'float') / sum(values)
+        values = np.array(unquote(values).split(','), 'float') / sum(np.array(unquote(values).split(','), 'float'))
     
     assert(len(values) == len(colors))
     return dict(zip(colors, values.tolist()))

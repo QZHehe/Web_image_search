@@ -14,7 +14,7 @@
             <h3>Colors</h3>
             {% include 'palette.html' %}
             <input type="hidden" id="palette_search_form_hidden_colors" name="colors" value="" />
-            <!--<input type="hidden" id="palette_search_form_hidden_values" name="values" value="" />-->
+            <input type="hidden" id="palette_search_form_hidden_values" name="values" value="0,1" />
           </div>
           <div id="palette_search_form_sic_types">
             <h3>Search Method</h3>
@@ -44,6 +44,7 @@
       </div>
     </div>
   </div>
+  <script src="/static/search_by_palette.js"></script>
   <script src="/static/jquery-1.8.3.js"></script>
   <script src="/static/sprintf-0.7-beta1.js"></script>
   <script>
@@ -60,8 +61,9 @@
         var sic_type = $("#palette_search_form input[name='sic_type']:checked").val();
         var sigma = $("#palette_search_form input[name='sigma']:checked").val();
         var colors = $('#palette_search_form_hidden_colors').serialize();
-        var search_url = sprintf('/search_by_palette/%s/%s?%s',
-          sic_type, sigma, colors);
+        var values = $('#palette_search_form_hidden_values').serialize();
+        var search_url = sprintf('/search_by_palette/%s/%s?%s&%s',
+          sic_type, sigma, colors,values);
         window.location = search_url;
         return false;
       });
@@ -106,7 +108,9 @@
       var search_url = sprintf(
         '/search_by_palette_json/%s/%s', sic_type, sigma);
       $.getJSON(search_url, data = {
-          'colors': Object.keys(colors).join(',')},
+          'colors': getObjectKeys(colors).join(','),
+          'values': getObjectValues(colors).join(',')
+              },
           success=display_results);
     });
   </script>
