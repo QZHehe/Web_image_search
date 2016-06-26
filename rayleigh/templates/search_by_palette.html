@@ -15,7 +15,7 @@
             <h3>Colors</h3>
             {% include 'palette.html' %}
             <input type="hidden" id="palette_search_form_hidden_colors" name="colors" value="" />
-            <input type="hidden" id="palette_search_form_hidden_values" name="values" value="" />
+            <input type="hidden" id="palette_search_form_hidden_values" name="values" value="0.1,0.9" />
             <div id="show_select_colors"></div>
           </div>
           <div id="palette_search_form_sic_types">
@@ -62,8 +62,10 @@
         var sic_type = $("#palette_search_form input[name='sic_type']:checked").val();
         var sigma = $("#palette_search_form input[name='sigma']:checked").val();
         var colors = $('#palette_search_form_hidden_colors').serialize();
-        var values = $('#palette_search_form_hidden_values').serialize();
-        var search_url = sprintf('/search_by_palette/%s/%s?%s&%s',
+//        var values= $('#palette_search_form_hidden_values').serialize();
+        var values = getValues();
+        values=encodeURIComponent(values.join(","));
+        var search_url = sprintf('/search_by_palette/%s/%s?%s&values=%s',
           sic_type, sigma, colors,values);
         window.location = search_url;
         return false;

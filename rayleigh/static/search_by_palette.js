@@ -19,8 +19,9 @@ function getObjectValues(object)
 function addShowSelectedColor(color)
 {
     $colorName=color.id.replace('#','')
-    $colorAdd = '<a id="show_'+$colorName+'"><span style="background-color: ';
-    $colorAdd+= color.id+' " /></a> '
+    $colorAdd = '<span id="show_'+$colorName+'"><a><span style="background-color: ';
+    $colorAdd+= color.id+' " /></a>'
+    $colorAdd+='<input class="input_value" value="" /></span>'
     $('#show_select_colors').append($colorAdd);
 }
 function deleteShowSelectedColor(color)
@@ -28,4 +29,12 @@ function deleteShowSelectedColor(color)
     $colorName=color.id.replace('#','')
     $colorDelete='show_'+$colorName;
     $('#'+$colorDelete).remove();
+}
+function getValues()
+{
+    var values = [];
+    $('input.input_value').each(function(){
+        values.push(parseFloat(this.value));
+    });
+    return values;
 }
