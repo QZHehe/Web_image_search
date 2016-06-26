@@ -16,8 +16,21 @@ function getObjectValues(object)
        values.push(object[property]);
      return values;
  }
+function addShowSelectedColors(colors)
+{
+    for (var color in colors)
+    {
+        $colorName=color.replace('#','')
+        $colorAdd = '<span id="show_'+$colorName+'"><a><span style="background-color: ';
+        $colorAdd+= color+' " /></a>'
+        $colorAdd+='<input class="input_value" value="'+colors[color]+'" /></span>'
+        $('#show_select_colors').append($colorAdd);
+    }
+
+}
 function addShowSelectedColor(color)
 {
+
     $colorName=color.id.replace('#','')
     $colorAdd = '<span id="show_'+$colorName+'"><a><span style="background-color: ';
     $colorAdd+= color.id+' " /></a>'
