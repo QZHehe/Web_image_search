@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, make_response, send_file, red
 import sys
 import os
 from urllib2 import unquote
+from werkzeug.utils import secure_filename
 
 
 repo_dirname = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -20,7 +21,11 @@ import rayleigh.util as util
 app = Flask(__name__)
 #app.debug = False  # TODO: make sure this is False in production
 app.debug = True
+UPLOAD_FOLDER='static/Uploads'
+ALLOWED_EXTENSIONS = set(['jpg', 'png', 'gif', 'bmp', 'jpeg'])
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.',1)[1] in ALLOWED_EXTENSIONS
 
 def make_json_response(body, status_code=200):
     print 'body:', body
@@ -209,6 +214,33 @@ def get_similar_images(sic_type, image_id):
     hist = sic.ic.hists[int(image_id), :]
     data = sic.search_by_color_hist(hist, 80)
     return make_json_response(data)
+
+
+@app.route('/search_by_upload')
+def search_by_upload_default():
+    return redirect(url_for(
+        'search_by_upload', sic_type=default_sic_type, sigma=default_sigma))
+
+
+@app.route('/search_by_upload/<sic_type>/<int:sigma>')
+def search_by_upload(sic_type, sigma):
+    colors = parse_colors_and_values()
+    print colors
+    return render_template(
+        'search_by_upload.html',
+        sic_types=sorted(sics.keys()), sic_type=sic_type,
+        sigmas=sigmas, sigma=sigma,
+        colors=Markup(json.dumps(colors)))
+
+
+@app.route('/upload_image', methods=['POST'])
+def upload_image():
+    file = request.files['myPhoto'];
+    if file and allowed_file(file.filename):
+        fname=secure_filename(file.filename)
+        file.save(os.path.join(UPLOAD_FOLDER,fname))
+
+    return 'UPLOAD COMPLETE'
 
 
 if __name__ == '__main__':
