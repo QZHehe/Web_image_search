@@ -6,7 +6,7 @@ collections by multiple colors given as a palette or derived from a query image.
 
 from palette import Palette
 
-from image import Image, PaletteQuery
+from image import Image, PaletteQuery, ImageUpload
 
 from assemble_flickr_dataset import \
     assemble_flickr_dataset, \

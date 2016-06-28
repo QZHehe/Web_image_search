@@ -229,18 +229,46 @@ def search_by_upload(sic_type, sigma):
     return render_template(
         'search_by_upload.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
-        sigmas=sigmas, sigma=sigma,
-        colors=Markup(json.dumps(colors)))
+        sigmas=sigmas, sigma=sigma)
 
 
 @app.route('/upload_image', methods=['POST'])
 def upload_image():
+    sic_type=request.values['sic_type'];
+    sigma=int(request.values['sigma']);
+    sic = sics[sic_type]
     file = request.files['myPhoto'];
     if file and allowed_file(file.filename):
         fname=secure_filename(file.filename)
-        file.save(os.path.join(UPLOAD_FOLDER,fname))
+        img = rayleigh.ImageUpload(file)
+        color_hist = util.histogram_colors_smoothed(
+        img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
+        color_hist=color_hist.tolist()
+    # return redirect(url_for(
+    #         'search_by_upload', sic_types=sorted(sics.keys()), sic_type=sic_type, sigma=default_sigma))
+    return render_template(
+        'search_by_upload.html',
+        sic_types=sorted(sics.keys()), sic_type=sic_type,
+        sigmas=sigmas, sigma=sigma,
+        color_hist=color_hist)
 
-    return 'UPLOAD COMPLETE'
+
+@app.route('/upload_image_json/<sic_type>/<int:sigma>')
+def upload_image_json(sic_type, sigma):
+    sic = sics[sic_type]
+    color_hist = request.args.get('color_hist', '')
+    if color_hist is "":
+        return make_json_response({'message': 'no request data'}, 400)
+    color_hist=np.array(unquote(color_hist[1:-1]).split(','), 'float')
+    b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
+    results, time_elapsed = sic.search_by_color_hist(color_hist, 80)
+    # hist = rayleigh.util.histogram_colors_strict(img.lab_array, palette)
+    # file.save(os.path.join(UPLOAD_FOLDER,fname))
+    return make_json_response({
+        'results': results, 'time_elapsed': time_elapsed,'pq_hist': b64_hist})
+
+
+
 
 
 if __name__ == '__main__':

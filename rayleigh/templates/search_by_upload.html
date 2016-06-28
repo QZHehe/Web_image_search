@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Rayleigh: Search by multiple colors</title>
+  <title>Rayleigh: Search by upload image</title>
   <link href="/static/main.css" media="all" rel="stylesheet" type="text/css"/>
   <script src="/static/search_by_palette.js"></script>
   <script src="/static/upload_image.js"></script>
@@ -10,30 +10,6 @@
   <div id="content">
     <!-- The left sidebar: palette selection and histogram display. -->
     <div id="search_sidebar">
-      <div id="palette_search">
-        <form id="palette_search_form" action='#'>
-          <div id="palette_search_form_colors">
-            <h3>Colors</h3>
-            {% include 'palette.html' %}
-            <input type="hidden" id="palette_search_form_hidden_colors" name="colors" value="" />
-          </div>
-          <div id="show_select_colors">
-              <h3>Selected Colors & Percentages</h3>
-          </div>
-          <div id="palette_search_form_sic_types">
-            <h3>Search Method</h3>
-            {% for st in sic_types %}
-              <input type="radio" name="sic_type" value="{{ st }}" {{ 'checked' if st == sic_type else '' }}>{{ st }}<br />
-            {% endfor %}
-
-            <h3>Palette Smoothing</h3>
-            {% for s in sigmas %}
-              <input type="radio" name="sigma" value={{ s }} {{ 'checked' if s == sigma else '' }}>{{ s }}<br />
-            {% endfor %}
-          </div>
-          <input id="palette_search_form_submit" type="submit" value="Search" />
-        </form>
-      </div>
       <hr />
       <div id="upload_image">
           <h3>Upload_image</h3>
@@ -48,6 +24,18 @@
                   </tr>
                   </tbody>
               </table>
+              <div id="palette_search_form_sic_types">
+                  <h3>Search Method</h3>
+                  {% for st in sic_types %}
+                  <input type="radio" name="sic_type" value="{{ st }}" {{ 'checked' if st == sic_type else '' }}>{{ st
+                  }}<br/>
+                  {% endfor %}
+
+                  <h3>Palette Smoothing</h3>
+                  {% for s in sigmas %}
+                  <input type="radio" name="sigma" value={{ s }} {{ 'checked' if s == sigma else '' }}>{{ s }}<br/>
+                  {% endfor %}
+              </div>
               <p><input type="submit" value="Send"/></p>
           </form>
       </div>
@@ -89,16 +77,23 @@
       });
       // upload image
       $('#upload_image_form').submit(function() {
+//        var sic_type = $("#palette_search_form input[name='sic_type']:checked").val();
+//        var sigma = $("#palette_search_form input[name='sigma']:checked").val();
+//        var search_url = sprintf('/upload_image/%s/%s',
+//          sic_type, sigma);
+//        window.location = search_url;
+//        return false;
 
       });
       // Prepare the color palette search form.
       var sic_type = "{{ sic_type }}";
       var sigma = "{{ sigma }}";
-      var colors = {{ colors }} || {};
+      var colors ="{{ colors }}" || {};
+      var color_hist ="{{ color_hist}}" ||{};
       colors_str = Object.keys(colors).join(',');
       $('#palette_search_form_hidden_colors').val(colors_str);
       // Add selected colors lable
-      addShowSelectedColors(({{ colors }} || {}));
+      addShowSelectedColors(("{{ colors }}" || {}));
       // Display the initial selected colors.
       $.each(colors, function(key, val) {
         document.getElementById(key).setAttribute('class', 'selected');
@@ -131,10 +126,9 @@
         {% include 'display_images.js' %}
       }
       var search_url = sprintf(
-        '/search_by_palette_json/%s/%s', sic_type, sigma);
+        '/upload_image_json/%s/%s', sic_type, sigma);
       $.getJSON(search_url, data = {
-          'colors': getObjectKeys(colors).join(','),
-          'values': getObjectValues(colors).join(',')
+          'color_hist': color_hist
               },
           success=display_results);
     });
