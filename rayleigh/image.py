@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from skimage.io import imread, imsave
 from skimage.color import rgb2lab, lab2rgb
@@ -147,6 +148,16 @@ class ImageUpload(object):
         h, w, d = img.shape
         self.h, self.w, self.d = img.shape
         self.lab_array = rgb2lab(img).reshape((h * w, d))
+        # Return image
+        root = os.path.dirname(__file__)
+        file_name = os.path.join(root, 'show_image.png')
+        tfname = file_name
+        imsave(tfname,img)
+
+        
+        
+        
+        
 
     def as_dict(self):
         """
@@ -174,3 +185,55 @@ class ImageUpload(object):
         quantized_lab_array = palette.lab_array[min_ind, :]
         img = lab2rgb(quantized_lab_array.reshape((self.h, self.w, self.d)))
         imsave(filename, img)
+        
+
+        
+
+class ImageShow(object):
+    """
+    Show the upload image , downsample if needed,
+    and convert to Lab colorspace.
+    Store original dimensions, resize_factor, and the filename of the image.
+
+    Image dimensions will be resized independently such that neither width nor
+    height exceed the maximum allowed dimension MAX_DIMENSION.
+
+    Parameters
+    ----------
+    file : image file to load 
+    """
+
+    MAX_DIMENSION = 100 + 1
+
+    def __init__(self, file):
+        self.file=file
+        img = imread(file)
+
+        # Handle grayscale and RGBA images.
+        # TODO: Should be smarter here in the future, but for now simply remove
+        # the alpha channel if present.
+        if img.ndim == 2:
+            img = np.tile(img[:, :, np.newaxis], (1, 1, 3))
+        elif img.ndim == 4:
+            img = img[:, :, :3]
+        
+        # Downsample for speed.
+        #
+        # NOTE: I can't find a good method to resize properly in Python!
+        # scipy.misc.imresize uses PIL, which needs 8bit data.
+        # Anyway, this is faster and almost as good.
+        #
+        # >>> def d(dim, max_dim): return arange(0, dim, dim / max_dim + 1).shape
+        # >>> plot(range(1200), [d(x, 200) for x in range(1200)])
+        h, w, d = tuple(img.shape)
+        self.orig_h, self.orig_w, self.orig_d = tuple(img.shape)
+        h_stride = h / self.MAX_DIMENSION + 1
+        w_stride = w / self.MAX_DIMENSION + 1
+        self.img = img[::h_stride, ::w_stride, :]
+        root = os.path.dirname(__file__)
+        file_name = os.path.join(root, 'show_image.png')
+        tfname = file_name
+        imsave(tfname, self.img)
+
+            
+       

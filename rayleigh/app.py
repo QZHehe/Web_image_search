@@ -262,11 +262,19 @@ def upload_image_json(sic_type, sigma):
     color_hist=np.array(unquote(color_hist[1:-1]).split(','), 'float')
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
     results, time_elapsed = sic.search_by_color_hist(color_hist, 80)
+    root = os.path.dirname(__file__)
+    file_name = os.path.join(root, 'show_image.png')
+    if os.path.exists(file_name):
+        tfname = file_name
+        show_image=open(tfname, 'rb').read().encode('base64').replace('\n', '')
+        os.remove(tfname)
     # hist = rayleigh.util.histogram_colors_strict(img.lab_array, palette)
     # file.save(os.path.join(UPLOAD_FOLDER,fname))
-    return make_json_response({
-        'results': results, 'time_elapsed': time_elapsed,'pq_hist': b64_hist})
-
+        return make_json_response({
+            'results': results, 'time_elapsed': time_elapsed,'pq_hist': b64_hist,'show_image':show_image})
+    else:
+        return make_json_response({
+            'results': results, 'time_elapsed': time_elapsed,'pq_hist': b64_hist})
 
 
 

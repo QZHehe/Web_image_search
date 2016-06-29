@@ -39,6 +39,10 @@
               <p><input type="submit" value="Send"/></p>
           </form>
       </div>
+      <div>
+          <div id="show_upload_image">
+          </div>
+      </div>
       <div id="palette_histogram">
         <h3>Palette histogram</h3>
         <div id="palette_query"></div>
@@ -90,6 +94,14 @@
       var sigma = "{{ sigma }}";
       var colors ="{{ colors }}" || {};
       var color_hist ="{{ color_hist}}" ||{};
+      var show_image="{{show_image}}}" || {};
+//      $('#show_upload_image').html(
+//          '<img width="100px" src="data:image/png;base64,' + json_data['show_image'] + '" />'
+//      );
+//      if (show_image !== {} ) {
+//          $('#uploadPreview').
+//          attr('src', 'data:image/png;base64,' + json_data['show_image'] )
+//      }
       colors_str = Object.keys(colors).join(',');
       $('#palette_search_form_hidden_colors').val(colors_str);
       // Add selected colors lable
@@ -122,6 +134,9 @@
         // note: sprintf does not work in the below line
         $('#palette_query').html(
           '<img width="240px" src="data:image/png;base64,' + json_data['pq_hist'] + '" />'
+        );
+        $('#show_upload_image').html(
+          '<img width="100px" src="data:image/png;base64,' + json_data['show_image'] + '" />'
         );
         {% include 'display_images.js' %}
       }
