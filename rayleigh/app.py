@@ -241,6 +241,8 @@ def upload_image():
     if file and allowed_file(file.filename):
         fname=secure_filename(file.filename)
         img = rayleigh.ImageUpload(file)
+        dui=img.dui
+        dui= "data:image/png;base64,"+dui
         color_hist = util.histogram_colors_smoothed(
         img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
         color_hist=color_hist.tolist()
@@ -250,7 +252,7 @@ def upload_image():
         'search_by_upload.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist)
+        color_hist=color_hist, dui=dui)
 
 
 @app.route('/upload_image_json/<sic_type>/<int:sigma>')

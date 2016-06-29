@@ -95,13 +95,13 @@
       var colors ="{{ colors }}" || {};
       var color_hist ="{{ color_hist}}" ||{};
       var show_image="{{show_image}}}" || {};
-//      $('#show_upload_image').html(
-//          '<img width="100px" src="data:image/png;base64,' + json_data['show_image'] + '" />'
-//      );
-//      if (show_image !== {} ) {
-//          $('#uploadPreview').
-//          attr('src', 'data:image/png;base64,' + json_data['show_image'] )
-//      }
+      var dui="{{dui|safe}}" ||"";
+      if (dui !== "" ) {
+        $('#show_upload_image').html(
+          '<img width="100px" src='+dui+ ' />'
+        );
+      }
+
       colors_str = Object.keys(colors).join(',');
       $('#palette_search_form_hidden_colors').val(colors_str);
       // Add selected colors lable
@@ -135,9 +135,7 @@
         $('#palette_query').html(
           '<img width="240px" src="data:image/png;base64,' + json_data['pq_hist'] + '" />'
         );
-        $('#show_upload_image').html(
-          '<img width="100px" src="data:image/png;base64,' + json_data['show_image'] + '" />'
-        );
+
         {% include 'display_images.js' %}
       }
       var search_url = sprintf(
