@@ -125,9 +125,10 @@ class ImageUpload(object):
         # Handle grayscale and RGBA images.
         # TODO: Should be smarter here in the future, but for now simply remove
         # the alpha channel if present.
-        if img.ndim == 2:
+        h, w, d=tuple(img.shape);
+        if d == 2:
             img = np.tile(img[:, :, np.newaxis], (1, 1, 3))
-        elif img.ndim == 4:
+        elif d == 4:
             img = img[:, :, :3]
         
         # Downsample for speed.
