@@ -155,6 +155,7 @@ class ImageUpload(object):
         tfname = file_name
         imsave(tfname,img)
         self.dui=open(tfname, 'rb').read().encode('base64').replace('\n', '')
+        os.remove(tfname)
 
 
         

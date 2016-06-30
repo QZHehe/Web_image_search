@@ -17,9 +17,9 @@ from searchable_collection import \
 
 dirname = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data2'))
 image_list_name = 'flickr_100K'
-algorithm = 'flann'
-sic_class = SearchableImageCollectionFLANN
-distance_metric = 'chi_square'
+algorithm = 'CKDTree'
+sic_class = SearchableImageCollectionCKDTree
+distance_metric = 'euclidean'
 sigma=16
 num_dimensions=0
 filename = os.path.join(dirname, '{}_{}_{}_{}_{}.pickle'.format(

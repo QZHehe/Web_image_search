@@ -268,6 +268,7 @@ def draw_image():
         color_hist = util.histogram_colors_smoothed(
         img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
         color_hist = color_hist.tolist()
+        os.remove('./image/imgout.png')
     return render_template(
         'show_draw_image.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,

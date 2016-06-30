@@ -93,7 +93,6 @@
 		canvas.width = canvasWidth;
 		canvas.height = canvasHeight;
 		context = canvas.getContext('2d');
-
 		canvasTop = $(canvas).offset().top;
 		canvasLeft = $(canvas).offset().left;
 
