@@ -4,6 +4,7 @@ from skimage.io import imread, imsave
 from skimage.color import rgb2lab, lab2rgb
 from sklearn.metrics import euclidean_distances
 import util
+import urllib
 
 
 class PaletteQuery(object):
@@ -151,7 +152,7 @@ class ImageUpload(object):
         self.lab_array = rgb2lab(img).reshape((h * w, d))
         # Return image
         root = os.path.dirname(__file__)
-        file_name = os.path.join(root, 'show_image.png')
+        file_name = os.path.join(root, 'image/'+'show_image.png')
         tfname = file_name
         imsave(tfname,img)
         self.dui=open(tfname, 'rb').read().encode('base64').replace('\n', '')
@@ -189,8 +190,24 @@ class ImageUpload(object):
         quantized_lab_array = palette.lab_array[min_ind, :]
         img = lab2rgb(quantized_lab_array.reshape((self.h, self.w, self.d)))
         imsave(filename, img)
-        
 
+
+class ImageModify(object):
+    """
+    Read the image to be modified
+
+    Parameters
+    ----------
+    file : image file to load
+    """
+
+    def __init__(self, url, id):
+        root = os.path.dirname(__file__)
+        file_name = os.path.join(root, 'image/'+id)
+        urllib.urlretrieve(url,file_name)
+        dui = open(file_name, 'rb').read().encode('base64').replace('\n', '')
+        self.dui="data:image/"+url[url.rfind('.')+1:]+";base64," + dui
+        os.remove(file_name)
         
 
 

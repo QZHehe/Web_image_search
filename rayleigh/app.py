@@ -304,5 +304,12 @@ def search_by_drawing(sic_type, sigma):
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma)
 
+@app.route('/modify_image/<sic_type>/<image_id>')
+def modify_image(sic_type,image_id):
+    image = sics[sic_type].ic.get_image(image_id, no_hist=True)
+    img = rayleigh.ImageModify(image['url'],image['id'])
+    return render_template(
+        'modify_image.html', image_url=img.dui)
+
 if __name__ == '__main__':
     app.run(debug=True)
