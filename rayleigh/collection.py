@@ -33,6 +33,7 @@ def get_mongodb_collection():
         raise Exception("Cannot instantiate ImageCollection without \
                          a MongoDB server running on port 27666")
     return connection.image_collection.images
+    # return connection.image_collection.testImage
 
 
 # For parallel execution, function must be in module scope
@@ -121,7 +122,8 @@ class ImageCollection(object):
             information in database for this image id.
         """
         if no_hist:
-            results = collection.find({'id': image_id}, fields={'hist': False})
+            # results = collection.find({'id': image_id}, fields={'hist': False})
+            results = collection.find({'id': image_id}, fields={'hist': False, 'spa_hist': False})
             # results = collection.find({'id': image_id})
         else:
             results = collection.find({'id': image_id})

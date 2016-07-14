@@ -5,6 +5,7 @@ from skimage.color import rgb2lab, lab2rgb
 from sklearn.metrics import euclidean_distances
 import util
 import urllib
+from colordescriptor import ColorDescriptor
 
 
 class PaletteQuery(object):
@@ -120,8 +121,9 @@ class ImageUpload(object):
     MAX_DIMENSION = 240 + 1
 
     def __init__(self, file):
-        self.file=file
+        self.file = file
         img = imread(file)
+        self.img = img
 
         # Handle grayscale and RGBA images.
         # TODO: Should be smarter here in the future, but for now simply remove
@@ -157,6 +159,11 @@ class ImageUpload(object):
         imsave(tfname,img)
         self.dui=open(tfname, 'rb').read().encode('base64').replace('\n', '')
         os.remove(tfname)
+
+    def get_spatial_features(self):
+        cd = ColorDescriptor((8, 12, 3))
+        feature = cd.describe(self.img)
+        return feature
 
 
         

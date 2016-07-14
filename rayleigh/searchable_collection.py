@@ -157,7 +157,44 @@ class SearchableImageCollection(object):
         if self.num_dimensions > 0 and not reduced:
             color_hist = self.pca.transform(color_hist)
         tt.tic('nn_ind')
-        nn_ind, nn_dists = self.nn_ind(color_hist, num)
+        nn_ind, nn_dists = self.nn_ind(color_hist, num, 'color_hist')
+        time_elapsed = tt.qtoc('nn_ind')
+        results = []
+        # TODO: tone up the amount of data returned: don't need resized size,
+        # _id, maybe something else?
+        for ind, dist in zip(nn_ind, nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = self.ic.get_image(img_id, no_hist=True)
+            img['url'] = cgi.escape(img['url'])
+            # img['url'] = img['url']
+            img['distance'] = dist
+            results.append(img)
+        return results, time_elapsed
+
+    def search_by_color_spatial_hist(self, spatial_hist, num=3, reduced=False):
+        """
+        Search images in database by color similarity to the given histogram.
+
+        Parameters
+        ----------
+        color_hist : (K,) ndarray
+            histogram over the color palette
+        num : int, optional
+            number of nearest neighbors to ret
+        reduced : boolean, optional
+            is the given color_hist already reduced in dimensionality?
+
+        Returns
+        -------
+        query_img : dict
+            info about the query image
+        results : list
+            list of dicts of nearest neighbors to query
+        """
+        if self.num_dimensions > 0 and not reduced:
+            spatial_hist = self.pca.transform(spatial_hist)
+        tt.tic('nn_ind')
+        nn_ind, nn_dists = self.nn_ind(spatial_hist, num, 'spatial_hist')
         time_elapsed = tt.qtoc('nn_ind')
         results = []
         # TODO: tone up the amount of data returned: don't need resized size,
@@ -203,16 +240,21 @@ class SearchableImageCollectionExact(SearchableImageCollection):
 
     DISTANCE_METRICS = ['manhattan', 'euclidean', 'chi_square']
 
-    def nn_ind(self, color_hist, num):
+    def nn_ind(self, color_hist, num, feature):
         """
         Exact nearest neighbor seach through exhaustive comparison.
         """
+        if feature == 'color_hist':
+            features = self.hists_reduced
+        elif feature == 'spatial_hist':
+            features = self.spa_hists_reduced
+
         if self.distance_metric == 'manhattan':
-            dists = manhattan_distances(color_hist, self.hists_reduced)
+            dists = manhattan_distances(color_hist, features)
         elif self.distance_metric == 'euclidean':
-            dists = euclidean_distances(color_hist, self.hists_reduced, squared=True)
+            dists = euclidean_distances(color_hist, features, squared=True)
         elif self.distance_metric == 'chi_square':
-            dists = -additive_chi2_kernel(color_hist, self.hists_reduced)
+            dists = -additive_chi2_kernel(color_hist, features)
         
         dists = dists.flatten()
         nn_ind = np.argsort(dists).flatten()[:num]

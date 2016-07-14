@@ -35,6 +35,15 @@
                   {% for s in sigmas %}
                   <input type="radio" name="sigma" value={{ s }} {{ 'checked' if s == sigma else '' }}>{{ s }}<br/>
                   {% endfor %}
+
+                  <h3>Feature</h3>
+                  {% for f in features %}
+                  <input type="radio" name="fea_type" value="{{ f }}" {{ 'checked' if f == fea_type else '' }}>{{ f
+                  }}<br/>
+                  {% endfor %}
+
+
+
               </div>
               <p><input type="submit" value="Send"/></p>
           </form>
@@ -98,6 +107,7 @@
       // Prepare the color palette search form.
       var sic_type = "{{ sic_type }}";
       var sigma = "{{ sigma }}";
+      var fea_type = "{{fea_type}}";
       var colors ="{{ colors }}" || {};
       var color_hist ="{{ color_hist}}" ||{};
       var show_image="{{show_image}}}" || {};
@@ -145,7 +155,7 @@
         {% include 'display_images.js' %}
       }
       var search_url = sprintf(
-        '/upload_image_json/%s/%s', sic_type, sigma);
+        '/upload_image_json/%s/%s/%s', sic_type, fea_type, sigma);
       $.getJSON(search_url, data = {
           'color_hist': color_hist
               },

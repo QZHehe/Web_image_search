@@ -39,28 +39,30 @@ def make_json_response(body, status_code=200):
 Load the Searchable Image Collections that can be used to search.
 """
 fname_dict = {
-    'data/flickr_100K_exact_chi_square_8_0.pickle': (
-        'Chi-square, sigma=8, Exact', rayleigh.SearchableImageCollectionExact),
+    # 'data/testImage_Exact_euclidean_0_0.pickle': (
+    #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
+    # 'data/testImage_Exact_euclidean_0_0.pickle': (
+    #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
     'data/flickr_100K_exact_chi_square_16_0.pickle': (
         'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
-    'data/flickr_100K_flann_chi_square_16_0.pickle': (
-        'Chi-square, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
-    'data/flickr_100K_exact_manhattan_8_0.pickle': (
-        'Manhattan, sigma=8, Exact', rayleigh.SearchableImageCollectionExact),
-    'data/flickr_100K_exact_manhattan_16_0.pickle': (
-        'Manhattan, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
-    'data/flickr_100K_flann_manhattan_16_0.pickle': (
-        'Manhattan, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
-    'data/flickr_100K_exact_euclidean_8_0.pickle': (
-        'Euclidean, sigma=8, Exact', rayleigh.SearchableImageCollectionExact),
-    'data/flickr_100K_exact_euclidean_16_0.pickle': (
-        'Euclidean, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
-    'data/flickr_100K_flann_euclidean_16_0.pickle': (
-        'Euclidean, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
-    'data/flickr_100K_CKDTree_manhattan_16_0.pickle': (
-        'Manhattan, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
-    'data/flickr_100K_CKDTree_euclidean_16_0.pickle': (
-        'Euclidean, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
+    # 'data/flickr_100K_flann_chi_square_16_0.pickle': (
+    #     'Chi-square, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
+    # 'data/flickr_100K_exact_manhattan_8_0.pickle': (
+    #     'Manhattan, sigma=8, Exact', rayleigh.SearchableImageCollectionExact),
+    # 'data/flickr_100K_exact_manhattan_16_0.pickle': (
+    #     'Manhattan, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
+    # 'data/flickr_100K_flann_manhattan_16_0.pickle': (
+    #     'Manhattan, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
+    # 'data/flickr_100K_exact_euclidean_8_0.pickle': (
+    #     'Euclidean, sigma=8, Exact', rayleigh.SearchableImageCollectionExact),
+    # 'data/flickr_100K_exact_euclidean_16_0.pickle': (
+    #     'Euclidean, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
+    # 'data/flickr_100K_flann_euclidean_16_0.pickle': (
+    #     'Euclidean, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
+    # 'data/flickr_100K_CKDTree_manhattan_16_0.pickle': (
+    #     'Manhattan, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
+    # 'data/flickr_100K_CKDTree_euclidean_16_0.pickle': (
+    #     'Euclidean, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
 }
 
 sics = {}
@@ -80,7 +82,8 @@ Set the default smoothing parameter applied to the color palette queries.
 """
 sigmas = [8, 16, 20]
 default_sigma = 16
-
+features = ['color', 'colorSpatial']
+default_feature = 'color'
 
 @app.route('/')
 def index():
@@ -219,23 +222,24 @@ def get_similar_images(sic_type, image_id):
 @app.route('/search_by_upload')
 def search_by_upload_default():
     return redirect(url_for(
-        'search_by_upload', sic_type=default_sic_type, sigma=default_sigma))
+        'search_by_upload', sic_type=default_sic_type, fea_type=default_feature, sigma=default_sigma))
 
 
-@app.route('/search_by_upload/<sic_type>/<int:sigma>')
-def search_by_upload(sic_type, sigma):
+@app.route('/search_by_upload/<sic_type>/<fea_type>/<int:sigma>')
+def search_by_upload(sic_type,fea_type, sigma):
     colors = parse_colors_and_values()
     print colors
     return render_template(
         'search_by_upload.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
-        sigmas=sigmas, sigma=sigma)
+        sigmas=sigmas, sigma=sigma, features=features, fea_type=fea_type)
 
 
 @app.route('/upload_image', methods=['POST'])
 def upload_image():
-    sic_type=request.values['sic_type'];
-    sigma=int(request.values['sigma']);
+    sic_type=request.values['sic_type']
+    sigma=int(request.values['sigma'])
+    fea_type=request.values['fea_type']
     sic = sics[sic_type]
     file = request.files['myPhoto'];
     if file and allowed_file(file.filename):
@@ -243,14 +247,17 @@ def upload_image():
         img = rayleigh.ImageUpload(file)
         dui=img.dui
         dui= "data:image/png;base64,"+dui
-        color_hist = util.histogram_colors_smoothed(
-        img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
-        color_hist=color_hist.tolist()
+        if fea_type == 'color':
+            color_hist = util.histogram_colors_smoothed(
+            img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
+            color_hist=color_hist.tolist()
+        elif fea_type == 'colorSpatial':
+            color_hist = img.get_spatial_features()
     return render_template(
         'search_by_upload.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist, dui=dui)
+        color_hist=color_hist, dui=dui, fea_type=fea_type)
 
 
 @app.route('/draw_image', methods=['POST'])
@@ -278,15 +285,18 @@ def draw_image():
 
 
 
-@app.route('/upload_image_json/<sic_type>/<int:sigma>')
-def upload_image_json(sic_type, sigma):
+@app.route('/upload_image_json/<sic_type>/<fea_type>/<int:sigma>')
+def upload_image_json(sic_type, fea_type, sigma):
     sic = sics[sic_type]
     color_hist = request.args.get('color_hist', '')
     if color_hist is "":
         return make_json_response({'message': 'no request data'}, 400)
     color_hist=np.array(unquote(color_hist[1:-1]).split(','), 'float')
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
-    results, time_elapsed = sic.search_by_color_hist(color_hist, 80)
+    if fea_type == 'color':
+        results, time_elapsed = sic.search_by_color_hist(color_hist, 3)
+    elif fea_type =='colorSpatial':
+        results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 3)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed,'pq_hist': b64_hist})
 
