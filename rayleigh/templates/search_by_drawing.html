@@ -78,10 +78,17 @@
             }}<br/>
             {% endfor %}
 
-            <h3>Palette Smoothing</h3>
-            {% for s in sigmas %}
-            <input type="radio" name="sigma" value={{ s }} {{ 'checked' if s == sigma else '' }}>{{ s }}<br/>
-            {% endfor %}
+			<h3>Palette Smoothing</h3>
+			{% for s in sigmas %}
+			<input type="radio" name="sigma" value={{ s }} {{ 'checked' if s == sigma else '' }}>{{ s }}<br/>
+			{% endfor %}
+
+			<h3>Feature</h3>
+			{% for f in features %}
+			<input type="radio" name="fea_type" value="{{ f }}" {{ 'checked' if f == fea_type else '' }}>{{ f
+			}}<br/>
+			{% endfor %}
+
         </div>
         <p><input type="submit" value="Send"/></p>
         </form>

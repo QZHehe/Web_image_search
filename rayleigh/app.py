@@ -237,9 +237,9 @@ def search_by_upload(sic_type,fea_type, sigma):
 
 @app.route('/upload_image', methods=['POST'])
 def upload_image():
-    sic_type=request.values['sic_type']
-    sigma=int(request.values['sigma'])
-    fea_type=request.values['fea_type']
+    sic_type = request.values['sic_type']
+    sigma = int(request.values['sigma'])
+    fea_type = request.values['fea_type']
     sic = sics[sic_type]
     file = request.files['myPhoto'];
     if file and allowed_file(file.filename):
@@ -262,27 +262,29 @@ def upload_image():
 
 @app.route('/draw_image', methods=['POST'])
 def draw_image():
-    sic_type=request.values['sic_type'];
-    image_dui=request.values['image'];
-    sigma=int(request.values['sigma']);
+    sic_type = request.values['sic_type']
+    image_dui = request.values['image']
+    sigma = int(request.values['sigma'])
+    fea_type = request.values['fea_type']
     sic = sics[sic_type]
     image = str(image_dui[22::]).decode('base64')
-    img = open('./image/imgout.png','wb')
+    img = open('./image/imgout.png', 'wb')
     img.write(image)
     img.close()
     if os.path.exists('./image/imgout.png'):
         img = rayleigh.ImageUpload('./image/imgout.png')
-        color_hist = util.histogram_colors_smoothed(
-        img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
-        color_hist = color_hist.tolist()
+        if fea_type == 'color':
+            color_hist = util.histogram_colors_smoothed(
+                img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
+            color_hist = color_hist.tolist()
+        elif fea_type == 'colorSpatial':
+            color_hist = img.get_spatial_features()
         os.remove('./image/imgout.png')
     return render_template(
         'show_draw_image.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist, dui=image_dui)
-
-
+        color_hist=color_hist, dui=image_dui, features=features, fea_type=fea_type)
 
 
 @app.route('/upload_image_json/<sic_type>/<fea_type>/<int:sigma>')
@@ -298,21 +300,24 @@ def upload_image_json(sic_type, fea_type, sigma):
     elif fea_type =='colorSpatial':
         results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 3)
     return make_json_response({
-        'results': results, 'time_elapsed': time_elapsed,'pq_hist': b64_hist})
+        'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
+
 
 @app.route('/search_by_drawing')
 def search_by_drawing_default():
     return redirect(url_for(
-        'search_by_drawing', sic_type=default_sic_type, sigma=default_sigma))
+        'search_by_drawing', sic_type=default_sic_type, fea_type=default_feature, sigma=default_sigma))
 
-@app.route('/search_by_drawing/<sic_type>/<int:sigma>')
-def search_by_drawing(sic_type, sigma):
+
+@app.route('/search_by_drawing/<sic_type>/<fea_type>/<int:sigma>')
+def search_by_drawing(sic_type, fea_type, sigma):
     colors = parse_colors_and_values()
     print colors
     return render_template(
         'search_by_drawing.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
-        sigmas=sigmas, sigma=sigma)
+        sigmas=sigmas, sigma=sigma,  features=features, fea_type=fea_type)
+
 
 @app.route('/modify_image/<sic_type>/<image_id>')
 def modify_image(sic_type,image_id):
