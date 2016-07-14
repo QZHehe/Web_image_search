@@ -41,10 +41,10 @@ Load the Searchable Image Collections that can be used to search.
 fname_dict = {
     # 'data/testImage_Exact_euclidean_0_0.pickle': (
     #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
-    # 'data/testImage_Exact_euclidean_0_0.pickle': (
-    #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
-    'data/flickr_100K_exact_chi_square_16_0.pickle': (
+    'data/testImage_Exact_euclidean_0_0.pickle': (
         'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
+    # 'data/flickr_100K_exact_chi_square_16_0.pickle': (
+    #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
     # 'data/flickr_100K_flann_chi_square_16_0.pickle': (
     #     'Chi-square, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
     # 'data/flickr_100K_exact_manhattan_8_0.pickle': (
@@ -257,7 +257,7 @@ def upload_image():
         'search_by_upload.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist, dui=dui, fea_type=fea_type)
+        color_hist=color_hist, dui=dui, features=features, fea_type=fea_type)
 
 
 @app.route('/draw_image', methods=['POST'])
@@ -317,7 +317,8 @@ def search_by_drawing(sic_type, sigma):
 @app.route('/modify_image/<sic_type>/<image_id>')
 def modify_image(sic_type,image_id):
     image = sics[sic_type].ic.get_image(image_id, no_hist=True)
-    img = rayleigh.ImageModify(image['url'],image['id'])
+    root = os.path.dirname(__file__)
+    img = rayleigh.ImageModify(root+image['url'],image['id'])
     return render_template(
         'modify_image.html', image_url=img.dui)
 
