@@ -161,7 +161,7 @@ class ImageUpload(object):
         os.remove(tfname)
 
     def get_spatial_features(self):
-        cd = ColorDescriptor((8, 12, 3))
+        cd = ColorDescriptor((8, 3, 3))
         feature = cd.describe(self.img)
         return feature
 

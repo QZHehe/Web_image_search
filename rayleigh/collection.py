@@ -106,6 +106,21 @@ class ImageCollection(object):
         cursor = collection.find()
         return np.array([cPickle.loads(image['hist']) for image in cursor])
 
+    def get_spatial_hists(self):
+        """
+        Return histograms of all images as a single numpy array.
+
+        Returns
+        -------
+        hists : (N,K) ndarray
+            where N is the number of images in the database and K is the number
+            of colors in the palette.
+        """
+        # TODO: scale this to larger datasets by using PyTables
+        # http://www.pytables.org/moin/HowToUse
+        cursor = collection.find()
+        return np.array([cPickle.loads(image['spa_hist']) for image in cursor])
+
     def get_image(self, image_id, no_hist=False):
         """
         Return information about the image at id, or None if it doesn't exist.

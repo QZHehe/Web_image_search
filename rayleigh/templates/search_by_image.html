@@ -13,8 +13,14 @@
       <form id="search_form" action='#'>
         <h3>Search Method</h3>
         {% for st in sic_types %}
-          <input type="radio" name="sic_type" value="{{ st }}" {{ 'checked' if st == sic_type else '' }}>{{ st }}<br />
+        <input type="radio" name="sic_type" value="{{ st }}" {{ 'checked' if st == sic_type else '' }}>{{ st }}<br/>
         {% endfor %}
+        <h3>Feature</h3>
+        {% for f in features %}
+        <input type="radio" name="fea_type" value="{{ f }}" {{ 'checked' if f == fea_type else '' }}>{{ f
+        }}<br/>
+        {% endfor %}
+
         <input id="search_form_submit" type="submit" value="Search" />
       </form>
       
@@ -59,11 +65,13 @@
       /* Prepare the color palette search form. */
       var sic_type = "{{ sic_type }}";
       var image_id = "{{ image_id }}";
+      var fea_type = "{{fea_type}}";
 
       $('#search_form').submit(function() {
         var sic_type = $("#search_form input[name='sic_type']:checked").val();
-        var search_url = sprintf('/search_by_image/%s/%s',
-          sic_type, image_id);
+        var fea_type = $("#search_form input[name='fea_type']:checked").val();
+        var search_url = sprintf('/search_by_image/%s/%s/%s',
+          sic_type,fea_type, image_id);
         window.location = search_url;
         return false;
       });
@@ -73,7 +81,7 @@
         {% include 'display_images.js' %}
       }
       var search_url = sprintf(
-        '/search_by_image_json/%s/%s', sic_type, image_id);
+        '/search_by_image_json/%s/%s/%s', sic_type,fea_type,image_id);
       $.getJSON(search_url, success=display_results);
     });
   </script>

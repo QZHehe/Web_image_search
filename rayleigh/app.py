@@ -150,21 +150,24 @@ def search_by_palette_json(sic_type, sigma):
         'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
 
 
-@app.route('/search_by_image/<sic_type>/<image_id>')
-def search_by_image(sic_type, image_id):
+@app.route('/search_by_image/<sic_type>/<fea_type>/<image_id>')
+def search_by_image(sic_type, fea_type, image_id):
     # TODO: don't rely on the two methods below in the template, but render
     # images directly here.
     image = sics[sic_type].ic.get_image(image_id, no_hist=True)
     return render_template(
         'search_by_image.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
-        image_url=image['url'], image_id=image_id)
+        image_url=image['url'], image_id=image_id, features=features, fea_type=fea_type)
 
 
-@app.route('/search_by_image_json/<sic_type>/<image_id>')
-def search_by_image_json(sic_type, image_id):
+@app.route('/search_by_image_json/<sic_type>/<fea_type>/<image_id>')
+def search_by_image_json(sic_type,fea_type ,image_id):
     sic = sics[sic_type]
-    query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 80)
+    if fea_type == 'color':
+        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'color', 80)
+    elif fea_type == 'colorSpatial':
+        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'colorSpatial', 80)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed})
 
@@ -296,9 +299,9 @@ def upload_image_json(sic_type, fea_type, sigma):
     color_hist=np.array(unquote(color_hist[1:-1]).split(','), 'float')
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
     if fea_type == 'color':
-        results, time_elapsed = sic.search_by_color_hist(color_hist, 3)
+        results, time_elapsed = sic.search_by_color_hist(color_hist, 10)
     elif fea_type =='colorSpatial':
-        results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 3)
+        results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 10)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
 

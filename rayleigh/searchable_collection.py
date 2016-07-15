@@ -44,6 +44,7 @@ class SearchableImageCollection(object):
             raise Exception("Unsupported distance metric.")
         self.num_dimensions = num_dimensions
         self.hists_reduced = self.ic.get_hists()
+        self.spa_hists_reduced = self.ic.get_spatial_hists()
         self.sigma = sigma
         if self.sigma > 0:
             self.smooth_histograms()
@@ -98,7 +99,23 @@ class SearchableImageCollection(object):
         color_hist = self.hists_reduced[img_ind, :]
         return color_hist
 
-    def search_by_image_in_dataset(self, img_id, num=20):
+    def get_image_spatial_hist(self, img_id):
+        """
+        Return the smoothed image histogram of the image with the given id.
+
+        Parameters
+        ----------
+        img_id : string
+
+        Returns
+        -------
+        color_hist : ndarray
+        """
+        img_ind = self.id_ind_map[img_id]
+        color_hist = self.spa_hists_reduced[img_ind, :]
+        return color_hist
+
+    def search_by_image_in_dataset(self, img_id,feature,num=20):
         """
         Search images in database for similarity to the image with img_id in
         the database.
@@ -117,8 +134,13 @@ class SearchableImageCollection(object):
             list of dicts of nearest neighbors to query
         """
         query_img_data = self.ic.get_image(img_id, no_hist=True)
-        color_hist = self.get_image_hist(img_id)
-        results, time_elapsed = self.search_by_color_hist(color_hist, num, reduced=True)
+        if feature == 'color':
+            color_hist = self.get_image_hist(img_id)
+            results, time_elapsed = self.search_by_color_hist(color_hist, num, reduced=True)
+        elif feature == 'colorSpatial':
+            color_hist = self.get_image_spatial_hist(img_id)
+            color_hist= np.array(color_hist, 'float')
+            results, time_elapsed = self.search_by_color_spatial_hist(color_hist, num, reduced=True)
         return query_img_data, results, time_elapsed
 
     def search_by_image(self, image_filename, num=20):
@@ -171,7 +193,7 @@ class SearchableImageCollection(object):
             results.append(img)
         return results, time_elapsed
 
-    def search_by_color_spatial_hist(self, spatial_hist, num=3, reduced=False):
+    def search_by_color_spatial_hist(self,spatial_hist , num=3, reduced=False):
         """
         Search images in database by color similarity to the given histogram.
 
