@@ -299,9 +299,9 @@ def upload_image_json(sic_type, fea_type, sigma):
     color_hist=np.array(unquote(color_hist[1:-1]).split(','), 'float')
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
     if fea_type == 'color':
-        results, time_elapsed = sic.search_by_color_hist(color_hist, 10)
+        results, time_elapsed = sic.search_by_color_hist(color_hist, 80)
     elif fea_type =='colorSpatial':
-        results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 10)
+        results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 80)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
 
