@@ -5,8 +5,10 @@ import matplotlib.pyplot as plt
 import cStringIO as StringIO
 from sklearn.metrics import euclidean_distances
 from skimage.io import imsave
+from skimage import transform, color
 from tictoc import TicToc
-
+import Image
+from compiler.ast import flatten
 
 def rgb2hex(rgb_number):
     """
@@ -216,6 +218,58 @@ def histogram_colors_smoothed(lab_array, palette, sigma=10,
     if plot_filename is not None:
         plot_histogram(color_hist_smooth, palette, plot_filename)
     return color_hist_smooth
+
+
+def calculate_hash(image):
+    """
+    Returns a hash in the image,
+
+    Parameters
+    ----------
+    image
+
+    Returns
+    -------
+    hash_string : ndarray
+    """
+    resize_width = 9
+    resize_height = 8
+    # image = Image.open(image)
+    # smaller_image = image.resize((resize_width, resize_height))
+    image = color.rgb2grey(image)
+    image = transform.resize(image, (resize_width, resize_height))
+    # smaller_image.show()
+    # grayscale_image = smaller_image.convert("L")
+    # # gray
+    # # grayscale_image.show()
+    # # compare
+    # imshow(image)
+    pixels = flatten(image.tolist())
+    difference = []
+    for row in range(resize_height):
+        row_start_index = row * resize_width
+        for col in range(resize_width - 1):
+            left_pixel_index = row_start_index + col
+            difference.append(pixels[left_pixel_index] > pixels[left_pixel_index + 1])
+    # change to 16bit
+    decimal_value = 0
+    hash_string = ""
+    for index, value in enumerate(difference):
+        if value:
+            decimal_value += value * (2 ** (index % 8))
+        if index % 8 == 7:
+            hash_string += str(hex(decimal_value)[2:].rjust(2, "0"))
+            decimal_value = 0
+
+    return hash_string
+
+
+def diff(dhash1, dhash2):
+    difference = (int(dhash1, 16)) ^ (int(dhash2, 16))
+    result = bin(difference).count("1")
+    return result
+
+
 
 
 def smooth_histogram(color_hist, palette, sigma=10):

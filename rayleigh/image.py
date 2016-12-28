@@ -165,7 +165,9 @@ class ImageUpload(object):
         feature = cd.describe(self.img)
         return feature
 
-
+    def get_texture(self):
+        texture = util.calculate_hash(self.img)
+        return texture
         
         
         

@@ -33,7 +33,7 @@ def get_mongodb_collection():
         raise Exception("Cannot instantiate ImageCollection without \
                          a MongoDB server running on port 27666")
     # return connection.image_collection.images
-    return connection.image_collection.testImage
+    return connection.image_collection.test1
 
 
 # For parallel execution, function must be in module scope
@@ -122,6 +122,38 @@ class ImageCollection(object):
         return np.array([cPickle.loads(image['spa_hist']) for image in cursor])
 
     def get_image(self, image_id, no_hist=False):
+        """
+        Return information about the image at id, or None if it doesn't exist.
+
+        Parameters
+        ----------
+        image_id : string
+        no_hist : boolean
+            If True, does not return the histogram, only the image metadata.
+
+        Returns
+        -------
+        image : dict, or None
+            information in database for this image id.
+        """
+        if no_hist:
+            # results = collection.find({'id': image_id}, fields={'hist': False})
+            results = collection.find({'id': image_id}, fields={'hist': False, 'spa_hist': False})
+            # results = collection.find({'id': image_id})
+        else:
+            results = collection.find({'id': image_id})
+        if results.count() == 1:
+            r = results[0]
+            if 'hist' in r:
+                r['hist'] = cPickle.loads(r['hist'])
+            return r
+        elif results.count() == 0:
+            return None
+        else:
+            raise("Should never be more than one result for the same id.")
+
+
+    def get_hash(self, image_id, no_hist=False):
         """
         Return information about the image at id, or None if it doesn't exist.
 

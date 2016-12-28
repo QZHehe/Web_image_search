@@ -41,7 +41,7 @@ Load the Searchable Image Collections that can be used to search.
 fname_dict = {
     # 'data/testImage_Exact_euclidean_0_0.pickle': (
     #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
-    'data/testImage_Exact_euclidean_0_0.pickle': (
+    'data/test1_Exact_euclidean_0_0.pickle': (
         'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
     # 'data/flickr_100K_exact_chi_square_16_0.pickle': (
     #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
@@ -84,6 +84,9 @@ sigmas = [8, 16, 20]
 default_sigma = 16
 features = ['color', 'colorSpatial']
 default_feature = 'color'
+texture = ['yes', 'no']
+default_texture = 'no'
+
 
 @app.route('/')
 def index():
@@ -225,7 +228,7 @@ def get_similar_images(sic_type, image_id):
 @app.route('/search_by_upload')
 def search_by_upload_default():
     return redirect(url_for(
-        'search_by_upload', sic_type=default_sic_type, fea_type=default_feature, sigma=default_sigma))
+        'search_by_upload', sic_type=default_sic_type, fea_type=default_feature, tex_type=default_texture, sigma=default_sigma))
 
 
 @app.route('/search_by_upload/<sic_type>/<fea_type>/<int:sigma>')
@@ -235,7 +238,7 @@ def search_by_upload(sic_type,fea_type, sigma):
     return render_template(
         'search_by_upload.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
-        sigmas=sigmas, sigma=sigma, features=features, fea_type=fea_type)
+        sigmas=sigmas, sigma=sigma, features=features, fea_type=fea_type, texture=texture, tex_type=default_texture)
 
 
 @app.route('/upload_image', methods=['POST'])
@@ -243,6 +246,7 @@ def upload_image():
     sic_type = request.values['sic_type']
     sigma = int(request.values['sigma'])
     fea_type = request.values['fea_type']
+    tex_type = request.values['tex_type']
     sic = sics[sic_type]
     file = request.files['myPhoto'];
     if file and allowed_file(file.filename):
@@ -256,11 +260,12 @@ def upload_image():
             color_hist=color_hist.tolist()
         elif fea_type == 'colorSpatial':
             color_hist = img.get_spatial_features()
+        hash = img.get_texture()
     return render_template(
         'search_by_upload.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist, dui=dui, features=features, fea_type=fea_type)
+        color_hist=color_hist, hash=hash, dui=dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
 
 
 @app.route('/draw_image', methods=['POST'])
@@ -290,16 +295,22 @@ def draw_image():
         color_hist=color_hist, dui=image_dui, features=features, fea_type=fea_type)
 
 
-@app.route('/upload_image_json/<sic_type>/<fea_type>/<int:sigma>')
-def upload_image_json(sic_type, fea_type, sigma):
+@app.route('/upload_image_json/<sic_type>/<fea_type>/<tex_type>/<int:sigma>')
+def upload_image_json(sic_type, fea_type, tex_type, sigma):
     sic = sics[sic_type]
     color_hist = request.args.get('color_hist', '')
     if color_hist is "":
         return make_json_response({'message': 'no request data'}, 400)
+    hash = request.args.get('hash', '')
+    if hash is "":
+        return make_json_response({'message': 'no request data'}, 400)
     color_hist=np.array(unquote(color_hist[1:-1]).split(','), 'float')
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
     if fea_type == 'color':
-        results, time_elapsed = sic.search_by_color_hist(color_hist, 80)
+        if tex_type == 'no':
+            results, time_elapsed = sic.search_by_color_hist(color_hist, 80)
+        else:
+            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 10)
     elif fea_type =='colorSpatial':
         results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 80)
     return make_json_response({

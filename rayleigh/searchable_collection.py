@@ -193,6 +193,57 @@ class SearchableImageCollection(object):
             results.append(img)
         return results, time_elapsed
 
+    def search_by_color_hist_texture(self, color_hist, hash,num=20, reduced=False):
+        """
+        Search images in database by color and texture similarity to the given histogram.
+
+        Parameters
+        ----------
+        color_hist : (K,) ndarray
+            histogram over the color palette
+        hash
+        num : int, optional
+            number of nearest neighbors to ret
+        reduced : boolean, optional
+            is the given color_hist already reduced in dimensionality?
+
+        Returns
+        -------
+        query_img : dict
+            info about the query image
+        results : list
+            list of dicts of nearest neighbors to query
+        """
+        if self.num_dimensions > 0 and not reduced:
+            color_hist = self.pca.transform(color_hist)
+        tt.tic('nn_ind')
+        nn_ind, nn_dists = self.nn_ind(color_hist, num, 'color_hist')
+        time_elapsed = tt.qtoc('nn_ind')
+        # according texture to reorder
+        # nn_ind2, nn_dists2 = self.tex_ind()
+        # get hash
+        hashs = []
+        for ind, dist in zip(nn_ind, nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
+            hashs.append(img)
+        diff = np.array([util.diff(hash, i) for i in hashs])
+        hash_result = np.argsort(diff)
+        hash_nn_ind = nn_ind[hash_result]
+        hash_nn_dists = nn_dists[hash_result]
+        results = []
+        # TODO: tone up the amount of data returned: don't need resized size,
+        # _id, maybe something else?
+        for ind, dist in zip(hash_nn_ind, hash_nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = self.ic.get_image(img_id, no_hist=True)
+            img['url'] = cgi.escape(img['url'])
+            # img['url'] = img['url']
+            img['distance'] = dist
+            results.append(img)
+        return results, time_elapsed
+
+
     def search_by_color_spatial_hist(self,spatial_hist , num=3, reduced=False):
         """
         Search images in database by color similarity to the given histogram.
