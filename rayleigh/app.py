@@ -311,8 +311,11 @@ def upload_image_json(sic_type, fea_type, tex_type, sigma):
             results, time_elapsed = sic.search_by_color_hist(color_hist, 80)
         else:
             results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 10)
-    elif fea_type =='colorSpatial':
-        results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 80)
+    elif fea_type == 'colorSpatial':
+        if tex_type == 'no':
+            results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 80)
+        else:
+            results, time_elapsed = sic.search_by_color_spatial_hist_texture(color_hist, hash, 10)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
 
