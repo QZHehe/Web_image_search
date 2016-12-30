@@ -30,6 +30,14 @@
                   <input type="radio" name="fea_type" value="{{ f }}" {{ 'checked' if f == fea_type else '' }}>{{ f
                   }}<br/>
                   {% endfor %}
+
+                  <h3>Texture</h3>
+                  {% for t in texture %}
+                  <input type="radio" name="tex_type" value="{{ t }}" {{ 'checked' if t == tex_type else '' }}>{{ t
+                  }}<br/>
+                  {% endfor %}
+
+
               </div>
       </div>
       <div>
@@ -95,8 +103,10 @@
       var sic_type = "{{ sic_type }}";
       var sigma = "{{ sigma }}";
       var fea_type = "{{fea_type}}";
+      var tex_type = "{{tex_type}}";
       var colors ="{{ colors }}" || {};
       var color_hist ="{{ color_hist}}" ||{};
+      var hash = "{{hash}}" ||{};
       var show_image="{{show_image}}}" || {};
       var dui="{{dui|safe}}" ||"";
       if (dui !== "" ) {
@@ -142,9 +152,10 @@
         {% include 'display_images.js' %}
       }
       var search_url = sprintf(
-        '/upload_image_json/%s/%s/%s', sic_type,fea_type, sigma);
+        '/upload_image_json/%s/%s/%s/%s', sic_type,fea_type,tex_type,sigma);
       $.getJSON(search_url, data = {
-          'color_hist': color_hist
+          'color_hist': color_hist,
+          'hash' : hash
               },
           success=display_results);
     });

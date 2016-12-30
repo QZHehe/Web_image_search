@@ -279,6 +279,7 @@ def draw_image():
     image_dui = request.values['image']
     sigma = int(request.values['sigma'])
     fea_type = request.values['fea_type']
+    tex_type = request.values['tex_type']
     sic = sics[sic_type]
     image = str(image_dui[22::]).decode('base64')
     img = open('./image/imgout.png', 'wb')
@@ -292,12 +293,13 @@ def draw_image():
             color_hist = color_hist.tolist()
         elif fea_type == 'colorSpatial':
             color_hist = img.get_spatial_features()
+        hash = img.get_texture()
         os.remove('./image/imgout.png')
     return render_template(
         'show_draw_image.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist, dui=image_dui, features=features, fea_type=fea_type)
+        color_hist=color_hist, hash=hash,dui=image_dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
 
 
 @app.route('/upload_image_json/<sic_type>/<fea_type>/<tex_type>/<int:sigma>')
@@ -328,7 +330,7 @@ def upload_image_json(sic_type, fea_type, tex_type, sigma):
 @app.route('/search_by_drawing')
 def search_by_drawing_default():
     return redirect(url_for(
-        'search_by_drawing', sic_type=default_sic_type, fea_type=default_feature, sigma=default_sigma))
+        'search_by_drawing', sic_type=default_sic_type, fea_type=default_feature, tex_type=default_texture, sigma=default_sigma))
 
 
 @app.route('/search_by_drawing/<sic_type>/<fea_type>/<int:sigma>')
@@ -338,7 +340,7 @@ def search_by_drawing(sic_type, fea_type, sigma):
     return render_template(
         'search_by_drawing.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
-        sigmas=sigmas, sigma=sigma,  features=features, fea_type=fea_type)
+        sigmas=sigmas, sigma=sigma,  features=features, fea_type=fea_type,texture=texture, tex_type=default_texture)
 
 
 @app.route('/modify_image/<sic_type>/<image_id>')

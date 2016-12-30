@@ -89,6 +89,12 @@
 			}}<br/>
 			{% endfor %}
 
+			<h3>Texture</h3>
+			{% for t in texture %}
+			<input type="radio" name="tex_type" value="{{ t }}" {{ 'checked' if t == tex_type else '' }}>{{ t
+			}}<br/>
+			{% endfor %}
+
         </div>
         <p><input type="submit" value="Send"/></p>
         </form>
