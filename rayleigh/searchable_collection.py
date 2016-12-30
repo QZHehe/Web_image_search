@@ -397,39 +397,70 @@ class SearchableImageCollectionFLANN(SearchableImageCollection):
         # Saving the flann object results in memory errors, so we use its own
         # method to save its index in a separate file.
         sic = cPickle.load(open(filename))
-        return sic.build_index(filename + '_flann_index')
+        return sic.build_index([filename + '_flann_index_n_spa', filename + '_flann_index_spa'])
 
     def save(self, filename):
         # See comment in load().
-        flann = self.flann
-        self.flann = None
+        # flann = self.n_spa.flann
+        # self.n_spa.flann = None
+        # cPickle.dump(self, open(filename, 'w'), 2)
+        # flann.save_index(filename + '_flann_index_n_spa')
+        # self.n_spa.flann = flann
+        #
+        # flann2 = self.spa.flann
+        # self.spa.flann = None
+        # cPickle.dump(self, open(filename, 'w'), 2)
+        # flann2.save_index(filename + '_flann_index_spa')
+        # self.spa.flann = flann2
+        flann = self.n_spa_flann
+        self.n_spa_flann = None
+        flann2 = self.spa_flann
+        self.spa_flann = None
         cPickle.dump(self, open(filename, 'w'), 2)
-        flann.save_index(filename + '_flann_index')
-        self.flann = flann
+        flann.save_index(filename + '_flann_index_n_spa')
+        flann2.save_index(filename + '_flann_index_spa')
+        self.n_spa_flann = flann
+        self.spa_flann = flann2
 
     def __init__(self, image_collection, distance_metric, sigma, dimensions):
         super(SearchableImageCollectionFLANN, self).__init__(
             image_collection, distance_metric, sigma, dimensions)
+
         self.build_index()
 
     def build_index(self, index_filename=None):
         tt.tic('build_index')
         pyflann.set_distance_type(self.distance_metric)
-        self.flann = pyflann.FLANN()
+        self.n_spa_flann = pyflann.FLANN()
+        self.spa_flann = pyflann.FLANN()
         if index_filename:
-            self.flann.load_index(index_filename, self.hists_reduced)
+            self.n_spa_flann.load_index(index_filename[0], self.hists_reduced)
+            self.spa_flann.load_index(index_filename[1], self.spa_hists_reduced)
         else:
-            self.params = self.flann.build_index(
+            self.params = self.n_spa_flann.build_index(
                 self.hists_reduced, algorithm='autotuned',
                 sample_fraction=0.3, target_precision=.8,
                 build_weight=0.01, memory_weight=0.)
-        print(self.params)
+            # self.spa_params = self.flann.build_index(
+            #     self.spa_hists_reduced, algorithm='autotuned',
+            #     sample_fraction=0.3, target_precision=.8,
+            #     build_weight=0.01, memory_weight=0.)
+            self.spa_params = self.spa_flann.build_index(
+                self.spa_hists_reduced, algorithm='autotuned',
+                sample_fraction=0.3, target_precision=.8,
+                build_weight=0.01, memory_weight=0.)
+        print(self.params, self.spa_params)
         tt.toc('build_index')
         return self
 
-    def nn_ind(self, color_hist, num):
-        nn_ind, nn_dists = self.flann.nn_index(
-            color_hist, num, checks=self.params['checks'])
+    def nn_ind(self, color_hist, num, feature):
+        if feature == 'color_hist':
+            nn_ind, nn_dists = self.n_spa_flann.nn_index(
+                color_hist, num, checks=self.params['checks'])
+        elif feature == 'spatial_hist':
+            nn_ind, nn_dists = self.spa_flann.nn_index(
+                color_hist, num, checks=self.spa_params['checks'])
+
         return nn_ind.flatten(), nn_dists.flatten()
 
 
@@ -466,9 +497,18 @@ class SearchableImageCollectionCKDTree(SearchableImageCollection):
         self.ckdtree = cKDTree(self.hists_reduced, self.LEAF_SIZE)
         self.p = self.Ps[self.distance_metric]
         tt.toc('build_index_ckdtree')
+
+        tt.tic('build_spatial_index_ckdtree')
+        self.spa_ckdtree = cKDTree(self.spa_hists_reduced, self.LEAF_SIZE)
+        self.spa_p = self.Ps[self.distance_metric]
+        tt.toc('build_spatial_index_ckdtree')
         return self
 
-    def nn_ind(self, color_hist, num):
-        nn_dists, nn_ind = self.ckdtree.query(
-            color_hist, num, eps=self.EPSILON, p=self.p)
+    def nn_ind(self, color_hist, num, feature):
+        if feature == 'color_hist':
+            nn_dists, nn_ind = self.ckdtree.query(
+                color_hist, num, eps=self.EPSILON, p=self.p)
+        elif feature == 'spatial_hist':
+            nn_dists, nn_ind = self.spa_ckdtree.query(
+                color_hist, num, eps=self.EPSILON, p=self.spa_p)
         return nn_ind.flatten(), nn_dists.flatten()

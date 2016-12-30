@@ -41,8 +41,8 @@ Load the Searchable Image Collections that can be used to search.
 fname_dict = {
     # 'data/testImage_Exact_euclidean_0_0.pickle': (
     #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
-    'data/test1_Exact_euclidean_0_0.pickle': (
-        'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
+    # 'data/test1_Exact_euclidean_0_0.pickle': (
+    #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
     # 'data/flickr_100K_exact_chi_square_16_0.pickle': (
     #     'Chi-square, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
     # 'data/flickr_100K_flann_chi_square_16_0.pickle': (
@@ -63,6 +63,11 @@ fname_dict = {
     #     'Manhattan, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
     # 'data/flickr_100K_CKDTree_euclidean_16_0.pickle': (
     #     'Euclidean, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
+    # 'data/test1_CKDTree_euclidean_16_0.pickle': (
+    #     'Euclidean, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
+    'data/test1_flann_euclidean_16_0.pickle': (
+        'Euclidean, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
+
 }
 
 sics = {}
@@ -308,12 +313,12 @@ def upload_image_json(sic_type, fea_type, tex_type, sigma):
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
     if fea_type == 'color':
         if tex_type == 'no':
-            results, time_elapsed = sic.search_by_color_hist(color_hist, 80)
+            results, time_elapsed = sic.search_by_color_hist(color_hist, 10)
         else:
             results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 10)
     elif fea_type == 'colorSpatial':
         if tex_type == 'no':
-            results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 80)
+            results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 10)
         else:
             results, time_elapsed = sic.search_by_color_spatial_hist_texture(color_hist, hash, 10)
     return make_json_response({
