@@ -153,29 +153,29 @@ def search_by_palette_json(sic_type, sigma):
     color_hist = util.histogram_colors_smoothed(
         pq.lab_array, sic.ic.palette, sigma=sigma, direct=False)
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
-    results, time_elapsed = sic.search_by_color_hist(color_hist, 80)
+    results, time_elapsed = sic.search_by_color_hist(color_hist, 10)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
 
 
-@app.route('/search_by_image/<sic_type>/<fea_type>/<image_id>')
-def search_by_image(sic_type, fea_type, image_id):
+@app.route('/search_by_image/<sic_type>/<fea_type>/<tex_type>/<image_id>')
+def search_by_image(sic_type, fea_type, tex_type, image_id):
     # TODO: don't rely on the two methods below in the template, but render
     # images directly here.
     image = sics[sic_type].ic.get_image(image_id, no_hist=True)
     return render_template(
         'search_by_image.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
-        image_url=image['url'], image_id=image_id, features=features, fea_type=fea_type)
+        image_url=image['url'], image_id=image_id, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
 
 
-@app.route('/search_by_image_json/<sic_type>/<fea_type>/<image_id>')
-def search_by_image_json(sic_type,fea_type ,image_id):
+@app.route('/search_by_image_json/<sic_type>/<fea_type>/<tex_type>/<image_id>')
+def search_by_image_json(sic_type,fea_type, tex_type,image_id):
     sic = sics[sic_type]
     if fea_type == 'color':
-        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'color', 80)
+        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'color', tex_type, 10)
     elif fea_type == 'colorSpatial':
-        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'colorSpatial', 80)
+        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'colorSpatial', tex_type, 10)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed})
 
@@ -226,7 +226,7 @@ def get_palette_image(sic_type, image_id):
 def get_similar_images(sic_type, image_id):
     sic = sics[sic_type]
     hist = sic.ic.hists[int(image_id), :]
-    data = sic.search_by_color_hist(hist, 80)
+    data = sic.search_by_color_hist(hist, 10)
     return make_json_response(data)
 
 

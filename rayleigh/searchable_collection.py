@@ -115,7 +115,7 @@ class SearchableImageCollection(object):
         color_hist = self.spa_hists_reduced[img_ind, :]
         return color_hist
 
-    def search_by_image_in_dataset(self, img_id,feature,num=20):
+    def search_by_image_in_dataset(self, img_id, feature, texture,num=20):
         """
         Search images in database for similarity to the image with img_id in
         the database.
@@ -135,12 +135,23 @@ class SearchableImageCollection(object):
         """
         query_img_data = self.ic.get_image(img_id, no_hist=True)
         if feature == 'color':
-            color_hist = self.get_image_hist(img_id)
-            results, time_elapsed = self.search_by_color_hist(color_hist, num, reduced=True)
+            if texture == 'no':
+                color_hist = self.get_image_hist(img_id)
+                results, time_elapsed = self.search_by_color_hist(color_hist, num, reduced=True)
+            else:
+                hash = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
+                color_hist = self.get_image_hist(img_id)
+                results, time_elapsed = self.search_by_color_hist_texture(color_hist, hash, num, reduced=True)
         elif feature == 'colorSpatial':
-            color_hist = self.get_image_spatial_hist(img_id)
-            color_hist= np.array(color_hist, 'float')
-            results, time_elapsed = self.search_by_color_spatial_hist(color_hist, num, reduced=True)
+            if texture == 'no':
+                color_hist = self.get_image_spatial_hist(img_id)
+                color_hist= np.array(color_hist, 'float')
+                results, time_elapsed = self.search_by_color_spatial_hist(color_hist, num, reduced=True)
+            else:
+                hash = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
+                color_hist = self.get_image_spatial_hist(img_id)
+                color_hist= np.array(color_hist, 'float')
+                results, time_elapsed = self.search_by_color_spatial_hist_texture(color_hist, hash, num, reduced=True)
         return query_img_data, results, time_elapsed
 
     def search_by_image(self, image_filename, num=20):
