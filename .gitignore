@@ -3,8 +3,8 @@ data
 doc/_build
 flickr_api.key
 rayleigh/static/dataset
-/rayleigh/*.pyc
-.idea
-/rayleigh/static/pic
-/rayleigh/pyflann/*.pyc
-/pyflann/*.pyc
+rayleigh/*.pyc
+.idea/
+rayleigh/static/pic
+rayleigh/pyflann/*.pyc
+pyflann/*.pyc
