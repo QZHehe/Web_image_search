@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+# encoding = utf-8
 import os
 import numpy as np
 from skimage.io import imread, imsave
@@ -147,6 +149,7 @@ class ImageUpload(object):
         h_stride = h / self.MAX_DIMENSION + 1
         w_stride = w / self.MAX_DIMENSION + 1
         img = img[::h_stride, ::w_stride, :]
+        self.simg = img
 
         # Convert to L*a*b colors.
         h, w, d = img.shape
@@ -168,10 +171,39 @@ class ImageUpload(object):
     def get_texture(self):
         texture = util.calculate_hash(self.img)
         return texture
-        
-        
-        
-        
+
+    def spatial_color_map_feature(self, palette):
+        """
+        计算图像空间颜色特征
+
+        参数
+        ----------------
+        img: 图像
+        palette:调色板颜色(88)
+
+        返回值
+        ----------------
+        feature:(13*64)的图像空间颜色特征
+
+        """
+        img = self.simg
+        # 建立特征矩阵(空)
+        feature = np.zeros([13, 64])
+        # 图像分块数
+        height_block_num = 8
+        width_block_num = 8
+        h, w, d = tuple(img.shape)
+        h_interval = h / height_block_num
+        w_interval = w / width_block_num
+        # 图像分块读取
+        for j in range(0, height_block_num):
+            for i in range(0, width_block_num):
+                block = img[j * h_interval:(j * h_interval + h_interval):,
+                        i * w_interval:(i * w_interval + w_interval):, ::]
+                feature_index = util.get_block_feature(palette, block)
+                # 将对应颜色置于1
+                feature[feature_index, j * width_block_num + i] = 1
+        return feature
 
     def as_dict(self):
         """

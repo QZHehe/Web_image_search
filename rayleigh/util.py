@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+# encoding = utf-8
 import os
 import numpy as np
 import tempfile
@@ -9,16 +11,8 @@ from skimage import transform, color
 from tictoc import TicToc
 import Image
 from compiler.ast import flatten
-
-def rgb2hex(rgb_number):
-    """
-    Args:
-        - rgb_number (sequence of float)
-
-    Returns:
-        - hex_number (string)
-    """
-    return '#%02x%02x%02x' % tuple([np.round(val * 255) for val in rgb_number])
+from scipy import signal
+from skimage.color import rgb2lab
 
 
 def hex2rgb(hexcolor_str):
@@ -32,6 +26,31 @@ def hex2rgb(hexcolor_str):
     color = hexcolor_str.strip('#')
     rgb = lambda x: round(int(x, 16) / 255., 5)
     return (rgb(color[:2]), rgb(color[2:4]), rgb(color[4:6]))
+
+# 计算颜色间距离矩阵
+colors = ['#ff0000', '#ff9900', '#ffe500', '#52ff00',
+          '#00fff0', '#00c2ff', '#0066ff', '#000aff',
+          '#8f00ff', '#ff00c7', '#b6b6b6', '#ffffff', '#000000']
+rgb_array = np.array([np.array(hex2rgb(x)) for x in colors])
+lab_array = rgb2lab(rgb_array[None, :, :]).squeeze()
+color_distance = euclidean_distances(lab_array, lab_array)
+color_distance = 1 / color_distance
+where_are_inf = np.isinf(color_distance)
+color_distance[where_are_inf] = 1
+
+
+def rgb2hex(rgb_number):
+    """
+    Args:
+        - rgb_number (sequence of float)
+
+    Returns:
+        - hex_number (string)
+    """
+    return '#%02x%02x%02x' % tuple([np.round(val * 255) for val in rgb_number])
+
+
+
 
 
 def color_hist_to_palette_image(color_hist, palette, percentile=90,
@@ -349,3 +368,80 @@ def makedirs(dirname):
         except:
             print("Exception on os.makedirs")
     return dirname
+
+
+def get_block_feature(palette, block):
+    """
+    计算8*8分块后每一块的特征颜色
+
+    参数
+    ----------------
+    palette:调色板颜色(88)
+    block: 图像块
+
+    返回值
+    ----------------
+    ind: 特征颜色的索引
+
+    """
+    h, w, d = tuple(block.shape)
+    pic_lab_array = rgb2lab(block).reshape((h * w, d))
+    dist = euclidean_distances(palette.lab_array.astype('float32'), pic_lab_array.astype('float32'), squared=True).T
+    min_ind = np.argmin(dist, axis=1)
+    num_colors = palette.lab_array.shape[0]
+    num_pixels = pic_lab_array.shape[0]
+    color_hist = 1. * np.bincount(min_ind, minlength=num_colors) / num_pixels
+    # 取颜色样点(调色板横轴颜色)像素百分比(这里包含了颜色样点的前一个颜色和后一个颜色)
+    color_hist1 = color_hist[2:-1:8]
+    color_hist2 = color_hist[1:-1:8]
+    color_hist3 = color_hist[3:-1:8]
+    result = color_hist1 + color_hist2 + color_hist3
+    result = np.append(result, [color_hist[80], color_hist[87]])
+    ind = np.argsort(-result)
+    ind = ind[(result[ind] > 0.05) & (result[ind] > np.percentile(result, 83))]
+    return ind
+
+
+def color_map_feature_distance(spa_fea1, spa_fea2, color_distance = color_distance):
+    """
+    计算两个图像空间颜色特征相似性(带颜色间距离权重)
+
+    参数
+    ----------------
+    spa_fea1:图像空间特征
+    color_distance:13种颜色距离的矩阵13*13
+
+    返回值
+    ----------------
+    feature:(13*64)的图像空间颜色特征
+
+    """
+    result = np.dot(np.array(spa_fea1), np.array(spa_fea2).T)
+    result2 = np.dot(result, color_distance)
+    distance = np.trace(result2)
+    return distance
+
+
+def modify_spatial_feature(feature):
+    """
+    修正手绘输入图像颜色空间特征
+    参数
+    ----------------
+    feature:图像空间特征
+
+    返回值
+    ----------------
+    result:修正后图像空间特征nd(13,64)
+
+    """
+    feature = feature.reshape((13, 8, 8))
+    result2 = []
+    b = np.array([[0.01, 0.05, 0.01],
+                  [0.05, 1, 0.05],
+                  [0.01, 0.05, 0.01]])
+    for i in range(0, 13):
+        result = signal.convolve2d(feature[i, :, :], b, boundary='fill', mode='same').reshape(64)
+        result[np.where(result > 1)] = 1
+        result2.append(result)
+    result2 = np.array(result2)
+    return result2

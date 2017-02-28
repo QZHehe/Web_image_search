@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+# encoding = utf-8
 """
 Methods to search an ImageCollection with brute force, exhaustive search.
 """
@@ -336,6 +338,60 @@ class SearchableImageCollection(object):
             img['distance'] = dist
             results.append(img)
         return results, time_elapsed
+
+    # 颜色空间分布
+    def search_by_color_map(self, color_hist, color_map, num=20, reduced=False):
+        """
+        Search images in database by color and texture similarity to the given histogram.
+
+        Parameters
+        ----------
+        color_hist : (K,) ndarray
+            histogram over the color palette
+        hash
+        num : int, optional
+            number of nearest neighbors to ret,
+        reduced : boolean, optional
+            is the given color_hist already reduced in dimensionality?
+
+        Returns
+        -------
+        query_img : dict
+            info about the query image
+        results : list
+            list of dicts of nearest neighbors to query
+        """
+        if self.num_dimensions > 0 and not reduced:
+            color_hist = self.pca.transform(color_hist)
+        tt.tic('nn_ind')
+        nn_ind, nn_dists = self.nn_ind(color_hist, num, 'color_hist')
+        time_elapsed = tt.qtoc('nn_ind')
+        # according texture to reorder
+        # nn_ind2, nn_dists2 = self.tex_ind()
+        # get color_map
+        color_maps = []
+        for ind, dist in zip(nn_ind, nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = self.ic.get_hash(img_id, no_hist=True)['color_map']
+            color_maps.append(img)
+        #?
+        diff = np.array([util.color_map_feature_distance(color_map, np.array(i)) for i in color_maps])
+        color_map_result = np.argsort(-diff)
+        color_map_nn_ind = nn_ind[color_map_result]
+        color_map_nn_dists = nn_dists[color_map_result]
+        results = []
+        # TODO: tone up the amount of data returned: don't need resized size,
+        # _id, maybe something else?
+        for ind, dist in zip(color_map_nn_ind, color_map_nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = self.ic.get_image(img_id, no_hist=True)
+            img['url'] = cgi.escape(img['url'])
+            # img['url'] = img['url']
+            img['distance'] = dist
+            results.append(img)
+        return results, time_elapsed
+
+
 
     @abc.abstractmethod
     def nn_ind(self, color_hist, num):

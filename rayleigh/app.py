@@ -1,3 +1,4 @@
+# -*-coding: UTF-8 -*-
 import matplotlib
 matplotlib.use('Agg')
 
@@ -11,6 +12,9 @@ import sys
 import os
 from urllib2 import unquote
 from werkzeug.utils import secure_filename
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 repo_dirname = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -87,7 +91,7 @@ Set the default smoothing parameter applied to the color palette queries.
 """
 sigmas = [8, 16, 20]
 default_sigma = 16
-features = ['color', 'colorSpatial']
+features = ['color', 'colorSpatial', 'colorMap']
 default_feature = 'color'
 texture = ['yes', 'no']
 default_texture = 'no'
@@ -179,6 +183,9 @@ def search_by_image_json(sic_type,fea_type, tex_type,image_id):
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed})
 
+# 颜色分布特征
+
+
 
 @app.route('/image_histogram/<sic_type>/<int:sigma>/<image_id>.png')
 def get_image_histogram(sic_type, sigma, image_id):
@@ -262,15 +269,22 @@ def upload_image():
         if fea_type == 'color':
             color_hist = util.histogram_colors_smoothed(
             img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
-            color_hist=color_hist.tolist()
+            color_hist = color_hist.tolist()
         elif fea_type == 'colorSpatial':
             color_hist = img.get_spatial_features()
+        elif fea_type == 'colorMap':
+            # 颜色直方图
+            color_hist = util.histogram_colors_smoothed(
+            img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
+            color_hist = color_hist.tolist()
+            # 颜色分布图
+        color_map = img.spatial_color_map_feature(sic.ic.palette)
         hash = img.get_texture()
     return render_template(
         'search_by_upload.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist, hash=hash, dui=dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
+        color_hist=color_hist, hash=hash, color_map=color_map.tolist(), dui=dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
 
 
 @app.route('/draw_image', methods=['POST'])
@@ -309,9 +323,11 @@ def upload_image_json(sic_type, fea_type, tex_type, sigma):
     if color_hist is "":
         return make_json_response({'message': 'no request data'}, 400)
     hash = request.args.get('hash', '')
+    color_map = request.args.get('color_map', '')
     if hash is "":
         return make_json_response({'message': 'no request data'}, 400)
     color_hist=np.array(unquote(color_hist[1:-1]).split(','), 'float')
+    color_map = np.array(unquote(color_map[2:-2]).replace('], [', ', ').split(','), 'float').reshape([13, 64])
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
     if fea_type == 'color':
         if tex_type == 'no':
@@ -323,6 +339,11 @@ def upload_image_json(sic_type, fea_type, tex_type, sigma):
             results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 10)
         else:
             results, time_elapsed = sic.search_by_color_spatial_hist_texture(color_hist, hash, 10)
+    elif fea_type == 'colorMap':
+        if tex_type == 'no':
+            results, time_elapsed = sic.search_by_color_map(color_hist, color_map, 10)
+        else:
+            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 10)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
 
