@@ -107,6 +107,7 @@
       var colors ="{{ colors }}" || {};
       var color_hist ="{{ color_hist}}" ||{};
       var hash = "{{hash}}" ||{};
+      var color_map = "{{color_map}}" ||{};
       var show_image="{{show_image}}}" || {};
       var dui="{{dui|safe}}" ||"";
       if (dui !== "" ) {
@@ -155,7 +156,8 @@
         '/upload_image_json/%s/%s/%s/%s', sic_type,fea_type,tex_type,sigma);
       $.getJSON(search_url, data = {
           'color_hist': color_hist,
-          'hash' : hash
+          'hash' : hash,
+          'color_map':color_map
               },
           success=display_results);
     });

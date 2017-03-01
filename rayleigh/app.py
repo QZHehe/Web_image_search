@@ -306,13 +306,20 @@ def draw_image():
             color_hist = color_hist.tolist()
         elif fea_type == 'colorSpatial':
             color_hist = img.get_spatial_features()
+        elif fea_type == 'colorMap':
+            # 颜色直方图
+            color_hist = util.histogram_colors_smoothed(
+            img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
+            color_hist = color_hist.tolist()
+            # 颜色分布图
+        color_map = img.spatial_color_map_feature(sic.ic.palette)
         hash = img.get_texture()
         os.remove('./image/imgout.png')
     return render_template(
         'show_draw_image.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist, hash=hash,dui=image_dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
+        color_hist=color_hist, hash=hash, color_map=color_map.tolist(), dui=image_dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
 
 
 @app.route('/upload_image_json/<sic_type>/<fea_type>/<tex_type>/<int:sigma>')
