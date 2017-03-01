@@ -180,11 +180,10 @@ def search_by_image_json(sic_type,fea_type, tex_type,image_id):
         query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'color', tex_type, 10)
     elif fea_type == 'colorSpatial':
         query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'colorSpatial', tex_type, 10)
+    elif fea_type == 'colorMap':
+        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'colorMap', tex_type, 10)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed})
-
-# 颜色分布特征
-
 
 
 @app.route('/image_histogram/<sic_type>/<int:sigma>/<image_id>.png')

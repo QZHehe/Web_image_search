@@ -154,6 +154,17 @@ class SearchableImageCollection(object):
                 color_hist = self.get_image_spatial_hist(img_id)
                 color_hist= np.array(color_hist, 'float')
                 results, time_elapsed = self.search_by_color_spatial_hist_texture(color_hist, hash, num, reduced=True)
+        elif feature == 'colorMap':
+            if texture == 'no':
+                color_map = self.ic.get_hash(img_id, no_hist=True)['color_map']
+                color_hist = self.get_image_hist(img_id)
+                results, time_elapsed = self.search_by_color_map(color_hist, color_map, 10)
+            else:
+                hash = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
+                color_hist = self.get_image_hist(img_id)
+                results, time_elapsed = self.search_by_color_hist_texture(color_hist, hash, num, reduced=True)
+
+
         return query_img_data, results, time_elapsed
 
     def search_by_image(self, image_filename, num=20):
