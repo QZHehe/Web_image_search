@@ -1,3 +1,4 @@
+# -*-coding: UTF-8 -*-
 """
 ImageCollection stores color information about images and exposes a method to
 add images to it, with support for parallel processing.
@@ -38,6 +39,48 @@ def get_mongodb_collection():
 
 # For parallel execution, function must be in module scope
 collection = get_mongodb_collection()
+
+def get_mongodb_collection2():
+    """
+    Establish connection to MongoDB and return the relevant collection.
+
+    Returns
+    -------
+    collection : pymongo.Collection
+        Pymongo Collection of images and their histograms.
+    """
+    try:
+        connection = MongoClient('localhost', 27666)
+    except ConnectionFailure:
+        raise Exception("Cannot instantiate ImageCollection without \
+                         a MongoDB server running on port 27666")
+    # return connection.image_collection.images
+    return connection.image_collection.test0303
+
+
+# For parallel execution, function must be in module scope
+collection_image = get_mongodb_collection2()
+
+def get_mongodb_collection_user():
+    """
+    Establish connection to MongoDB and return the relevant collection.
+
+    Returns
+    -------
+    collection : pymongo.Collection
+        Pymongo Collection of images and their histograms.
+    """
+    try:
+        connection = MongoClient('localhost', 27666)
+    except ConnectionFailure:
+        raise Exception("Cannot instantiate ImageCollection without \
+                         a MongoDB server running on port 27666")
+    # return connection.image_collection.images
+    return connection.image_collection
+
+
+# For parallel execution, function must be in module scope
+collection_user = get_mongodb_collection_user()
 
 
 def process_image(args):

@@ -12,6 +12,7 @@ import sys
 import os
 from urllib2 import unquote
 from werkzeug.utils import secure_filename
+from ainit import create_app
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -23,6 +24,7 @@ import rayleigh
 import rayleigh.util as util
 
 app = Flask(__name__)
+app = create_app(app)
 #app.debug = False  # TODO: make sure this is False in production
 app.debug = True
 UPLOAD_FOLDER='static/Uploads'
