@@ -4,7 +4,7 @@ doc/_build
 flickr_api.key
 rayleigh/static/dataset
 rayleigh/*.pyc
-.idea/
+.idea
 rayleigh/static/pic
 rayleigh/pyflann/*.pyc
 pyflann/*.pyc
