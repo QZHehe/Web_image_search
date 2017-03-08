@@ -5,7 +5,7 @@ from . import main
 from pymongo import MongoClient, DESCENDING
 from models import Temp, Permission, Post, body_html, PostImage
 from flask_login import login_required, current_user, redirect, url_for
-from .forms import EditProfileForm, EditProfileAdminForm, PostForm, EditPostForm, CommentForm, PostImageForm
+from .forms import EditProfileForm, EditProfileAdminForm, PostForm, EditPostForm, CommentForm, PostImageForm, PostImagesForm
 from decorators import admin_required, permission_required
 from bson.objectid import ObjectId
 from datetime import datetime
@@ -269,6 +269,26 @@ def index():
     return render_template('main/index.html', form=form, posts=posts, pagination=pagination, show_followed=show_followed)
 
 
+# 批量上传图片
+@main.route('/upload_images', methods=['GET', 'POST'])
+@login_required
+def upload_images():
+    form = PostImagesForm()
+    if current_user.can(Permission.WRITE_ARTICLES) and \
+            form.validate_on_submit():
+        for filename in request.files.getlist('image'):
+            PostImage(body=filename, text=form.text.data).new_image()
+        return redirect(url_for('.index'))
+    page = request.args.get('page', 1, type=int)
+    show_followed = False
+    if current_user.is_authenticated:
+        show_followed = bool(request.cookies.get('show_followed', ''))
+    if show_followed:
+        pagination = Paginate(page, 1)
+    else:
+        pagination = Paginate(page, 0)
+    posts = pagination.item
+    return render_template('main/upload_images.html', form=form, posts=posts, pagination=pagination, show_followed=show_followed)
 
 
 @main.route('/user/<username>')

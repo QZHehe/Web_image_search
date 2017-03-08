@@ -269,12 +269,12 @@ class ImageMongo(object):
 
     def __init__(self, file, url=None):
         self.file = file
-        self.id = str(file.filename)
+        self.name = str(file.filename)
         self.url = url
         img = imread(file)
         self.img = img
-        root = os.path.dirname(__file__)
-        file_name = os.path.join(root, 'image/' + self.id)
+        # root = os.path.dirname(__file__)
+        # file_name = os.path.join(root, 'image/' + self.id)
         # self.url = 'pic/'+newid+self.id.split('.')[-1]
         # tfname = file_name
         # imsave(tfname, self.img)
@@ -357,16 +357,16 @@ class ImageMongo(object):
     def rename(self, newname):
         root = os.path.dirname(__file__)
         file_path = os.path.join(root, 'static/pic/')
-        url = 'pic/'+str(newname)+'.'+self.id.split('.')[-1]
-        tfname = str(newname)+'.'+self.id.split('.')[-1]
+        url = 'pic/'+str(newname)+'.'+self.name.split('.')[-1]
+        tfname = str(newname)+'.'+self.name.split('.')[-1]
         imsave(file_path+tfname, self.img)
-        return url
+        return url, tfname
 
     def as_dict(self):
         """
         Return relevant info about self in a dict.
         """
-        return {'id': self.id,
+        return {'name': self.name,
                 'resized_width': self.w, 'resized_height': self.h,
                 'width': self.orig_w, 'height': self.orig_h}
 

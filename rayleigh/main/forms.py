@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 # encoding = utf-8
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import StringField, SubmitField, TextAreaField, SelectField, BooleanField
 from auth.forms import Province_choice
@@ -11,14 +11,14 @@ from flask_pagedown.fields import PageDownField
 from collection import collection_image,collection_user
 
 
-class EditProfileForm(Form):
+class EditProfileForm(FlaskForm):
     name = StringField('姓名', validators=[Length(0, 64)])
     location = SelectField('地址', choices=Province_choice)
     about_me = TextAreaField('自我介绍', validators=[Length(0, 64)])
     submit = SubmitField('提交')
 
 
-class EditProfileAdminForm(Form):
+class EditProfileAdminForm(FlaskForm):
     choices = [('Administrator', '管理员'), ('Moderator', '协管员'), ('User', '用户')]
     email = StringField('邮箱', validators=[Required(), Length(1, 64),
                                           Email()])
@@ -49,7 +49,7 @@ class EditProfileAdminForm(Form):
             raise ValidationError('用户名已被注册.')
 
 
-class PostForm(Form):
+class PostForm(FlaskForm):
     body = PageDownField('有什么想说的吗？', validators=[Required()])
     # image = FileField('上传图片',validators=[
     #     FileField(),
@@ -58,7 +58,7 @@ class PostForm(Form):
     submit = SubmitField('发表')
 
 
-class PostImageForm(Form):
+class PostImageForm(FlaskForm):
 
     image = FileField('上传图片',validators=[
         FileRequired('文件未选择!'),
@@ -68,15 +68,26 @@ class PostImageForm(Form):
     submit = SubmitField('发表')
 
 
-class EditPostForm(Form):
+class EditPostForm(FlaskForm):
     body = PageDownField('', validators=[Required()])
     submit = SubmitField('修改')
 
 
-class EditPostImageForm(Form):
+class EditPostImageForm(FlaskForm):
     body = PageDownField('', validators=[Required()])
     submit = SubmitField('修改')
 
-class CommentForm(Form):
+
+class CommentForm(FlaskForm):
     body = StringField('', validators=[Required()])
     submit = SubmitField('发布')
+
+
+class PostImagesForm(FlaskForm):
+
+    image = FileField('批量上传图片',validators=[
+        FileRequired('文件未选择!'),
+        FileAllowed(['jpg','png','JPG'],'只能上传图片')
+    ])
+    text = PageDownField('图片说明', validators=[Required()])
+    submit = SubmitField('发表')

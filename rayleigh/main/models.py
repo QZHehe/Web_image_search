@@ -223,8 +223,9 @@ class PostImage:
         collection = dict(img.as_dict().items()+collection.items())
         newname = collection_image.insert(collection)
         # 插入图片为图片修改名称
-        url = img.rename(newname)
+        url, name = img.rename(newname)
         collection_image.update({'_id': newname}, {'$set': {'url': url}})
+        collection_image.update({'_id': newname}, {'$set': {'id': name}})
 
 
 

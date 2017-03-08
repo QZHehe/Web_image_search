@@ -5,7 +5,7 @@ from pymongo.errors import ConnectionFailure
 from bson import Binary
 import cPickle
 import util
-from image import ImageUpload
+# from image import ImageUpload
 from palette import Palette
 from util import TicToc
 import glob
