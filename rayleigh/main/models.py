@@ -190,13 +190,14 @@ class Post:
 
 palette=Palette(num_hues=10, sat_range=2, light_range=3)
 
+
 class PostImage:
     def __init__(self, body, text):
         self.body = body
         self.text = text
         self.body_html = ''
 
-    def new_image(self):
+    def new_image(self, show=True):
         # self.body_html = body_html(self.body)
         img = ImageMongo(self.body)
         hash = img.get_texture()
@@ -218,7 +219,8 @@ class PostImage:
             'spa_hist': bson_spa_hist,
             'color_map': color_map,
             'describe': self.text,
-            'comments':[]
+            'comments':[],
+            'show': show
         }
         collection = dict(img.as_dict().items()+collection.items())
         newname = collection_image.insert(collection)

@@ -90,4 +90,5 @@ class PostImagesForm(FlaskForm):
         FileAllowed(['jpg','png','JPG'],'只能上传图片')
     ])
     text = PageDownField('图片说明', validators=[Required()])
+    show = BooleanField('前端显示')
     submit = SubmitField('发表')

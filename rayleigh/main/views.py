@@ -14,15 +14,18 @@ from collection import collection_image ,collection_user
 
 
 class Paginate:
-    def __init__(self, page, show_follow):
+    def __init__(self, page, show_follow, show_all = 0):
         if show_follow == 0:
-            posts = collection_image.find().sort('issuing_time', DESCENDING)
+            if show_all == 0:
+                posts = collection_image.find({'show': True}).sort('issuing_time', DESCENDING)
+            if show_all == 1:
+                posts = collection_image.find().sort('issuing_time', DESCENDING)
             self.total = posts.count()
             self.posts = posts
         if show_follow == 1:
             self.posts = []
             following = collection_user.User.find_one({'username': current_user.username}).get('following')
-            image = collection_image.find().sort('issuing_time', DESCENDING)
+            image = collection_image.find({'show': True}).sort('issuing_time', DESCENDING)
             # following.append([current_user.username, 'date'])
             for i in range(following.__len__()):
                 for x in range(image.count()):
@@ -262,9 +265,9 @@ def index():
     if current_user.is_authenticated:
         show_followed = bool(request.cookies.get('show_followed', ''))
     if show_followed:
-        pagination = Paginate(page, 1)
+        pagination = Paginate(page, 1, 0)
     else:
-        pagination = Paginate(page, 0)
+        pagination = Paginate(page, 0, 0)
     posts = pagination.item
     return render_template('main/index.html', form=form, posts=posts, pagination=pagination, show_followed=show_followed)
 
@@ -277,16 +280,16 @@ def upload_images():
     if current_user.can(Permission.WRITE_ARTICLES) and \
             form.validate_on_submit():
         for filename in request.files.getlist('image'):
-            PostImage(body=filename, text=form.text.data).new_image()
+            PostImage(body=filename, text=form.text.data).new_image(form.show.data)
         return redirect(url_for('.index'))
     page = request.args.get('page', 1, type=int)
     show_followed = False
     if current_user.is_authenticated:
         show_followed = bool(request.cookies.get('show_followed', ''))
     if show_followed:
-        pagination = Paginate(page, 1)
+        pagination = Paginate(page, 1, 1)
     else:
-        pagination = Paginate(page, 0)
+        pagination = Paginate(page, 0, 1)
     posts = pagination.item
     return render_template('main/upload_images.html', form=form, posts=posts, pagination=pagination, show_followed=show_followed)
 
