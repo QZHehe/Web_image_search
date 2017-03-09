@@ -19,11 +19,20 @@ class Paginate:
     def __init__(self, page, show_follow, show_all = 0):
         if show_follow == 0:
             if show_all == 0:
-                posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
+                self.posts = []
+                # posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
+                posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0})
+                for pos in posts:
+                    self.posts.append(pos)
+                self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
             if show_all == 1:
-                posts = collection_image.find({},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
+                self.posts = []
+                posts = collection_image.find({},{'spa_hist':0,'color_map':0,'hist':0})
+                for pos in posts:
+                    self.posts.append(pos)
+                self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
             self.total = posts.count()
-            self.posts = posts
+
         if show_follow == 1:
             self.posts = []
             following = collection_user.User.find_one({'username': current_user.username}).get('following')
@@ -286,6 +295,7 @@ def index():
 @main.route('/upload_images', methods=['GET', 'POST'])
 @login_required
 def upload_images():
+    num = collection_image.find({'index': False}).count()
     form = PostImagesForm()
     if current_user.can(Permission.WRITE_ARTICLES) and \
             form.validate_on_submit():
@@ -301,7 +311,7 @@ def upload_images():
     else:
         pagination = Paginate(page, 0, 1)
     posts = pagination.item
-    return render_template('main/upload_images.html', form=form, posts=posts, pagination=pagination, show_followed=show_followed)
+    return render_template('main/upload_images.html', form=form, posts=posts, pagination=pagination, show_followed=show_followed, num=num)
 
 
 @main.route('/user/<username>')
