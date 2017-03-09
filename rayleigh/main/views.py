@@ -10,28 +10,38 @@ from decorators import admin_required, permission_required
 from bson.objectid import ObjectId
 from datetime import datetime
 import os
-from collection import collection_image ,collection_user
+from collection import collection_image ,collection_user, ImageCollection
+from searchable_collection import SearchableImageCollectionFLANN
+from palette import Palette
 
 
 class Paginate:
     def __init__(self, page, show_follow, show_all = 0):
         if show_follow == 0:
             if show_all == 0:
-                posts = collection_image.find({'show': True}).sort('issuing_time', DESCENDING)
+                posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
             if show_all == 1:
-                posts = collection_image.find().sort('issuing_time', DESCENDING)
+                posts = collection_image.find({},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
             self.total = posts.count()
             self.posts = posts
         if show_follow == 1:
             self.posts = []
             following = collection_user.User.find_one({'username': current_user.username}).get('following')
-            image = collection_image.find({'show': True}).sort('issuing_time', DESCENDING)
+            # image = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
             # following.append([current_user.username, 'date'])
+            # for i in range(following.__len__()):
+            #     for x in range(image.count()):
+            #         if following[i][0] == image[x].get('username'):
+            #             self.posts.append(image[x])
+            #             self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
+            # self.total = self.posts.__len__()
+            # image = collection_image.find({'show': True}, {'spa_hist': 0, 'color_map': 0, 'hist': 0}).sort(
+            #     'issuing_time', DESCENDING)
             for i in range(following.__len__()):
-                for x in range(image.count()):
-                    if following[i][0] == image[x].get('username'):
-                        self.posts.append(image[x])
-                        self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
+                posts = collection_image.find({'username': following[i][0], 'show': True},{'spa_hist':0,'color_map':0,'hist':0})
+                for pos in posts:
+                    self.posts.append(pos)
+            self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
             self.total = self.posts.__len__()
         self.pages = int(self.total / 20)
         if self.total % 20 != 0:
@@ -70,7 +80,7 @@ class Paginate:
 
 class PaginateUser:
     def __init__(self, page, username):
-        posts = collection_image.find({'username': username}).sort('issuing_time', DESCENDING)
+        posts = collection_image.find({'username': username}, {'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
         self.total = posts.count()
         self.pages = int(self.total / 20)
         if self.total % 20 != 0:
@@ -369,7 +379,7 @@ def edit_profile_admin(id):
 
 @main.route('/post/<id>', methods=['GET', 'POST'])
 def post(id):
-    post = collection_image.find({'_id': ObjectId(id)})
+    post = collection_image.find({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0})
     form = CommentForm()
     if form.validate_on_submit():
         comments = post[0].get('comments')
@@ -389,7 +399,7 @@ def post(id):
 @main.route('/edit/<id>', methods=['GET', 'POST'])
 @login_required
 def edit(id):
-    post = collection_image.find_one({'_id': ObjectId(id)})
+    post = collection_image.find_one({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0})
     if current_user.id != post.get('user_id') and \
             not current_user.can(Permission.ADMINISTER):
         abort(403)
@@ -516,7 +526,7 @@ def show_followed():
 @main.route('/delete/<id>')
 @login_required
 def delete(id):
-    user = collection_image.find({'_id': ObjectId(id)})
+    user = collection_image.find({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0})
     if not current_user.username == user[0].get('username') and not current_user.is_administrator():
         abort(304)
     timedata = request.args.get('data')
@@ -534,7 +544,7 @@ def delete(id):
 @main.route('/deletepost/<id>')
 @login_required
 def deletepost(id):
-    post = collection_image.find({'_id': ObjectId(id)})
+    post = collection_image.find({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0})
     if not current_user.username == post[0].get('username') and not current_user.is_administrator():
         abort(304)
     root = os.path.dirname(os.path.dirname(__file__))
@@ -544,3 +554,29 @@ def deletepost(id):
     collection_image.remove({"_id": ObjectId(id)})
     flash('删除成功')
     return redirect(url_for('.index'))
+
+# 构建索引
+@main.route('/buildindexes')
+@login_required
+def buildindexes():
+    # 删除索引
+    path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    filelist = os.listdir(path + '/data')
+    for file in filelist:
+        os.remove(path + '/data' + '/' + file)
+    flash('删除成功')
+    # 构建索引
+    image_list_name = 'test1'
+    algorithm = 'flann'
+    sic_class = SearchableImageCollectionFLANN
+    distance_metric = 'euclidean'
+    sigma = 16
+    num_dimensions = 0
+    filename = os.path.join(path + '/data' + '/', '{}_{}_{}_{}_{}.pickle'.format(
+        image_list_name, algorithm, distance_metric, sigma, num_dimensions))
+    palette = Palette(num_hues=10, sat_range=2, light_range=3)
+    ic = ImageCollection(palette)
+    sic = sic_class(ic, distance_metric, sigma, num_dimensions)
+    sic.save(filename)
+    flash('构建索引成功')
+    return redirect(url_for('.upload_images'))
