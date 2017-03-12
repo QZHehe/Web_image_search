@@ -23,6 +23,7 @@
              {{ form.submit }}
         </form>
         <h3>新增 {{ num }} 张图片</h3>
+        <a href="{{ url_for('.buildindexes') }}">构建索引</a>
         {% endif %}
     </div>
     <div class="post-tabs">

@@ -220,6 +220,7 @@ class PostImage:
             'color_map': color_map,
             'describe': self.text,
             'comments':[],
+            'index': False,
             'show': show
         }
         collection = dict(img.as_dict().items()+collection.items())

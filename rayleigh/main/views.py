@@ -21,7 +21,7 @@ class Paginate:
             if show_all == 0:
                 self.posts = []
                 # posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
-                posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0})
+                posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING).limit(2000)
                 for pos in posts:
                     self.posts.append(pos)
                 self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
@@ -31,7 +31,7 @@ class Paginate:
                 for pos in posts:
                     self.posts.append(pos)
                 self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
-            self.total = posts.count()
+            self.total = posts.count(True)
 
         if show_follow == 1:
             self.posts = []
