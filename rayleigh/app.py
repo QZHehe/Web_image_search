@@ -172,7 +172,7 @@ def search_by_image(sic_type, fea_type, tex_type, image_id):
     return render_template(
         'search_by_image.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
-        image_url=image['url'], image_id=image_id, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
+        image_url=image['url'], image_id=image_id, features=features, fea_type=fea_type, texture=['yes', 'no', 'cnn'], tex_type=tex_type)
 
 
 @app.route('/search_by_image_json/<sic_type>/<fea_type>/<tex_type>/<image_id>')
@@ -339,19 +339,19 @@ def upload_image_json(sic_type, fea_type, tex_type, sigma):
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
     if fea_type == 'color':
         if tex_type == 'no':
-            results, time_elapsed = sic.search_by_color_hist(color_hist, 10)
+            results, time_elapsed = sic.search_by_color_hist(color_hist, 70)
         else:
-            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 10)
+            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 70)
     elif fea_type == 'colorSpatial':
         if tex_type == 'no':
-            results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 10)
+            results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 70)
         else:
-            results, time_elapsed = sic.search_by_color_spatial_hist_texture(color_hist, hash, 10)
+            results, time_elapsed = sic.search_by_color_spatial_hist_texture(color_hist, hash, 70)
     elif fea_type == 'colorMap':
         if tex_type == 'no':
-            results, time_elapsed = sic.search_by_color_map(color_hist, color_map, 10)
+            results, time_elapsed = sic.search_by_color_map(color_hist, color_map, 70)
         else:
-            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 10)
+            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 70)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
 

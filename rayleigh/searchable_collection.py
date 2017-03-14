@@ -140,6 +140,10 @@ class SearchableImageCollection(object):
             if texture == 'no':
                 color_hist = self.get_image_hist(img_id)
                 results, time_elapsed = self.search_by_color_hist(color_hist, num, reduced=True)
+            elif texture =='cnn':
+                cnn = np.array([cPickle.loads(self.ic.get_hash(img_id, no_hist=True)['cnn_feature'])])
+                color_hist = self.get_image_hist(img_id)
+                results, time_elapsed = self.search_by_color_hist_cnn(color_hist, cnn[0], num, reduced=True)
             else:
                 hash = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
                 color_hist = self.get_image_hist(img_id)
@@ -149,6 +153,11 @@ class SearchableImageCollection(object):
                 color_hist = self.get_image_spatial_hist(img_id)
                 color_hist= np.array(color_hist, 'float')
                 results, time_elapsed = self.search_by_color_spatial_hist(color_hist, num, reduced=True)
+            elif texture =='cnn':
+                cnn = np.array([cPickle.loads(self.ic.get_hash(img_id, no_hist=True)['cnn_feature'])])
+                color_hist = self.get_image_spatial_hist(img_id)
+                color_hist = np.array(color_hist, 'float')
+                results, time_elapsed = self.search_by_color_spatial_hist_cnn(color_hist, cnn[0], num, reduced=True)
             else:
                 hash = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
                 color_hist = self.get_image_spatial_hist(img_id)
@@ -267,6 +276,57 @@ class SearchableImageCollection(object):
             results.append(img)
         return results, time_elapsed
 
+    def search_by_color_hist_cnn(self, color_hist, cnn ,num=20, reduced=False):
+        """
+        Search images in database by color and texture similarity to the given histogram.
+
+        Parameters
+        ----------
+        color_hist : (K,) ndarray
+            histogram over the color palette
+        hash
+        num : int, optional
+            number of nearest neighbors to ret,
+        reduced : boolean, optional
+            is the given color_hist already reduced in dimensionality?
+
+        Returns
+        -------
+        query_img : dict
+            info about the query image
+        results : list
+            list of dicts of nearest neighbors to query
+        """
+        if self.num_dimensions > 0 and not reduced:
+            color_hist = self.pca.transform(color_hist)
+        tt.tic('nn_ind')
+        nn_ind, nn_dists = self.nn_ind(color_hist, num, 'color_hist')
+        time_elapsed = tt.qtoc('nn_ind')
+        # according texture to reorder
+        # nn_ind2, nn_dists2 = self.tex_ind()
+        # get hash
+        cnns = []
+        for ind, dist in zip(nn_ind, nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = np.array([cPickle.loads(self.ic.get_hash(img_id, no_hist=True)['cnn_feature'])])[0]
+            cnns.append(img)
+        cnns = np.array(cnns)
+        diff = np.dot(cnn, cnns.T)
+        hash_result = np.argsort(-diff)
+        hash_nn_ind = nn_ind[hash_result]
+        hash_nn_dists = nn_dists[hash_result]
+        results = []
+        # TODO: tone up the amount of data returned: don't need resized size,
+        # _id, maybe something else?
+        for ind, dist in zip(hash_nn_ind, hash_nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = self.ic.get_image(img_id, no_hist=True)
+            img['url'] = cgi.escape(img['url'])
+            # img['url'] = img['url']
+            img['distance'] = dist
+            results.append(img)
+        return results, time_elapsed
+
     def search_by_color_spatial_hist_texture(self, spatial_hist, hash, num=3, reduced=False):
         """
         Search images in database by color similarity to the given histogram.
@@ -303,6 +363,54 @@ class SearchableImageCollection(object):
         hash_nn_ind = nn_ind[hash_result]
         hash_nn_dists = nn_dists[hash_result]
 
+        results = []
+        # TODO: tone up the amount of data returned: don't need resized size,
+        # _id, maybe something else?
+        for ind, dist in zip(hash_nn_ind, hash_nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = self.ic.get_image(img_id, no_hist=True)
+            img['url'] = cgi.escape(img['url'])
+            img['distance'] = dist
+            results.append(img)
+        return results, time_elapsed
+
+    def search_by_color_spatial_hist_cnn(self, spatial_hist, cnn, num=3, reduced=False):
+        """
+        Search images in database by color similarity to the given histogram.
+
+        Parameters
+        ----------
+        color_hist : (K,) ndarray
+            histogram over the color palette
+        num : int, optional
+            number of nearest neighbors to ret
+        reduced : boolean, optional
+            is the given color_hist already reduced in dimensionality?
+
+        Returns
+        -------
+        query_img : dict
+            info about the query image
+        results : list
+            list of dicts of nearest neighbors to query
+        """
+        if self.num_dimensions > 0 and not reduced:
+            spatial_hist = self.pca.transform(spatial_hist)
+        tt.tic('nn_ind')
+        nn_ind, nn_dists = self.nn_ind(spatial_hist, num, 'spatial_hist')
+        time_elapsed = tt.qtoc('nn_ind')
+
+        # get hash
+        cnns = []
+        for ind, dist in zip(nn_ind, nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = np.array([cPickle.loads(self.ic.get_hash(img_id, no_hist=True)['cnn_feature'])])[0]
+            cnns.append(img)
+        cnns = np.array(cnns)
+        diff = np.dot(cnn, cnns.T)
+        hash_result = np.argsort(-diff)
+        hash_nn_ind = nn_ind[hash_result]
+        hash_nn_dists = nn_dists[hash_result]
         results = []
         # TODO: tone up the amount of data returned: don't need resized size,
         # _id, maybe something else?

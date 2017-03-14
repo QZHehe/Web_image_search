@@ -10,6 +10,7 @@ import urllib
 from colordescriptor import ColorDescriptor
 
 
+
 class PaletteQuery(object):
     """
     Extract a L*a*b color array from a dict representation of a palette query.
