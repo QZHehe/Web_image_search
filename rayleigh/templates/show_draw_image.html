@@ -111,6 +111,7 @@
       var color_hist ="{{ color_hist}}" ||{};
       var hash = "{{hash}}" ||{};
       var color_map = "{{color_map}}" ||{};
+      var spa_color_hist = "{{spa_color_hist}}";
       var show_image="{{show_image}}}" || {};
       var dui="{{dui|safe}}" ||"";
       if (dui !== "" ) {
@@ -160,7 +161,8 @@
       $.getJSON(search_url, data = {
           'color_hist': color_hist,
           'hash' : hash,
-          'color_map':color_map
+          'color_map':color_map,
+          'spa_color_hist':spa_color_hist
               },
           success=display_results);
     });

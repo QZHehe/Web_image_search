@@ -40,16 +40,22 @@ class SearchableImageCollection(object):
     """
     def __init__(self, image_collection, dist_metric, sigma, num_dimensions):
         self.ic = image_collection
+        print 'get id ind map'
         self.id_ind_map = self.ic.get_id_ind_map()
+        print 'get id ind map end'
         self.distance_metric = dist_metric
         if self.distance_metric not in self.DISTANCE_METRICS:
             raise Exception("Unsupported distance metric.")
         self.num_dimensions = num_dimensions
+        print 'get_hist'
         self.hists_reduced = self.ic.get_hists()
-        self.spa_hists_reduced = self.ic.get_spatial_hists()
+        print 'get_hist end'
+        # self.spa_hists_reduced = self.ic.get_spatial_hists()
         self.sigma = sigma
         if self.sigma > 0:
+            print 'smooth'
             self.smooth_histograms()
+            print 'smooth end'
         if self.num_dimensions > 0:
             self.reduce_dimensionality()
 
@@ -74,6 +80,7 @@ class SearchableImageCollection(object):
             color_hist = self.hists_reduced[i, :]
             self.hists_reduced[i, :] = util.smooth_histogram(
                 color_hist, self.ic.palette, self.sigma)
+            print i
 
     def reduce_dimensionality(self):
         """
@@ -149,25 +156,28 @@ class SearchableImageCollection(object):
                 color_hist = self.get_image_hist(img_id)
                 results, time_elapsed = self.search_by_color_hist_texture(color_hist, hash, num, reduced=True)
         elif feature == 'colorSpatial':
-            if texture == 'no':
-                color_hist = self.get_image_spatial_hist(img_id)
-                color_hist= np.array(color_hist, 'float')
-                results, time_elapsed = self.search_by_color_spatial_hist(color_hist, num, reduced=True)
-            elif texture =='cnn':
-                cnn = np.array([cPickle.loads(self.ic.get_hash(img_id, no_hist=True)['cnn_feature'])])
-                color_hist = self.get_image_spatial_hist(img_id)
-                color_hist = np.array(color_hist, 'float')
-                results, time_elapsed = self.search_by_color_spatial_hist_cnn(color_hist, cnn[0], num, reduced=True)
-            else:
-                hash = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
-                color_hist = self.get_image_spatial_hist(img_id)
-                color_hist= np.array(color_hist, 'float')
-                results, time_elapsed = self.search_by_color_spatial_hist_texture(color_hist, hash, num, reduced=True)
+            # if texture == 'no':
+                # color_hist = self.get_image_spatial_hist(img_id)
+                # color_hist= np.array(color_hist, 'float')
+                # results, time_elapsed = self.search_by_color_spatial_hist(color_hist, num, reduced=True)
+            # elif texture =='cnn':
+                # cnn = np.array([cPickle.loads(self.ic.get_hash(img_id, no_hist=True)['cnn_feature'])])
+                # color_hist = self.get_image_spatial_hist(img_id)
+                # color_hist = np.array(color_hist, 'float')
+                # results, time_elapsed = self.search_by_color_spatial_hist_cnn(color_hist, cnn[0], num, reduced=True)
+            # else:
+                # hash = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
+                # color_hist = self.get_image_spatial_hist(img_id)
+                # color_hist= np.array(color_hist, 'float')
+                # results, time_elapsed = self.search_by_color_spatial_hist_texture(color_hist, hash, num, reduced=True)
+            color_hist = self.get_image_hist(img_id)
+            spa_color_hist = np.array([cPickle.loads(self.ic.get_spa_hist(img_id, no_hist=True)['spa_hist'])])[0]
+            results, time_elapsed = self.search_by_color_spatial_hist(color_hist, spa_color_hist, 100)
         elif feature == 'colorMap':
             if texture == 'no':
                 color_map = self.ic.get_hash(img_id, no_hist=True)['color_map']
                 color_hist = self.get_image_hist(img_id)
-                results, time_elapsed = self.search_by_color_map(color_hist, color_map, 10)
+                results, time_elapsed = self.search_by_color_map(color_hist, color_map, 70)
             else:
                 hash = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
                 color_hist = self.get_image_hist(img_id)
@@ -217,6 +227,7 @@ class SearchableImageCollection(object):
         results = []
         # TODO: tone up the amount of data returned: don't need resized size,
         # _id, maybe something else?
+        tt.tic('find')
         for ind, dist in zip(nn_ind, nn_dists):
             img_id = self.id_ind_map[ind]
             img = self.ic.get_image(img_id, no_hist=True)
@@ -224,7 +235,10 @@ class SearchableImageCollection(object):
             # img['url'] = img['url']
             img['distance'] = dist
             results.append(img)
+        print  tt.qtoc('find')
         return results, time_elapsed
+
+
 
     def search_by_color_hist_texture(self, color_hist, hash,num=20, reduced=False):
         """
@@ -422,7 +436,7 @@ class SearchableImageCollection(object):
             results.append(img)
         return results, time_elapsed
 
-    def search_by_color_spatial_hist(self, spatial_hist, num, reduced=False):
+    def search_by_color_spatial_hist(self, color_hist, spatial_hist, num, reduced=False):
         """
         Search images in database by color similarity to the given histogram.
 
@@ -442,18 +456,46 @@ class SearchableImageCollection(object):
         results : list
             list of dicts of nearest neighbors to query
         """
+        # if self.num_dimensions > 0 and not reduced:
+        #     spatial_hist = self.pca.transform(spatial_hist)
+        # tt.tic('nn_ind')
+        # nn_ind, nn_dists = self.nn_ind(spatial_hist, num, 'spatial_hist')
+        # time_elapsed = tt.qtoc('nn_ind')
+        # results = []
+        # # TODO: tone up the amount of data returned: don't need resized size,
+        # # _id, maybe something else?
+        # for ind, dist in zip(nn_ind, nn_dists):
+        #     img_id = self.id_ind_map[ind]
+        #     img = self.ic.get_image(img_id, no_hist=True)
+        #     img['url'] = cgi.escape(img['url'])
+        #     img['distance'] = dist
+        #     results.append(img)
         if self.num_dimensions > 0 and not reduced:
-            spatial_hist = self.pca.transform(spatial_hist)
+            color_hist = self.pca.transform(color_hist)
         tt.tic('nn_ind')
-        nn_ind, nn_dists = self.nn_ind(spatial_hist, num, 'spatial_hist')
+        nn_ind, nn_dists = self.nn_ind(color_hist, num, 'color_hist')
         time_elapsed = tt.qtoc('nn_ind')
+        # according texture to reorder
+        # nn_ind2, nn_dists2 = self.tex_ind()
+        # get hash
+        spa_hists = []
+        for ind, dist in zip(nn_ind, nn_dists):
+            img_id = self.id_ind_map[ind]
+            img = np.array([cPickle.loads(self.ic.get_spa_hist(img_id, no_hist=True)['spa_hist'])])[0]
+            spa_hists.append(img)
+        spa_hists = np.array(spa_hists)
+        diff = euclidean_distances(spatial_hist, spa_hists)
+        spa_result = np.argsort(diff[0])
+        spa_nn_ind = nn_ind[spa_result]
+        spa_nn_dists = nn_dists[spa_result]
         results = []
         # TODO: tone up the amount of data returned: don't need resized size,
         # _id, maybe something else?
-        for ind, dist in zip(nn_ind, nn_dists):
+        for ind, dist in zip(spa_nn_ind, spa_nn_dists):
             img_id = self.id_ind_map[ind]
             img = self.ic.get_image(img_id, no_hist=True)
             img['url'] = cgi.escape(img['url'])
+            # img['url'] = img['url']
             img['distance'] = dist
             results.append(img)
         return results, time_elapsed
@@ -600,42 +642,44 @@ class SearchableImageCollectionFLANN(SearchableImageCollection):
         # self.spa.flann = flann2
         flann = self.n_spa_flann
         self.n_spa_flann = None
-        flann2 = self.spa_flann
-        self.spa_flann = None
+        # flann2 = self.spa_flann
+        # self.spa_flann = None
         cPickle.dump(self, open(filename, 'w'), 2)
         flann.save_index(filename + '_flann_index_n_spa')
-        flann2.save_index(filename + '_flann_index_spa')
+        # flann2.save_index(filename + '_flann_index_spa')
         self.n_spa_flann = flann
-        self.spa_flann = flann2
+        # self.spa_flann = flann2
 
     def __init__(self, image_collection, distance_metric, sigma, dimensions):
         super(SearchableImageCollectionFLANN, self).__init__(
             image_collection, distance_metric, sigma, dimensions)
-
+        print 'build_index'
         self.build_index()
+        print 'build_index end'
 
     def build_index(self, index_filename=None):
         tt.tic('build_index')
         pyflann.set_distance_type(self.distance_metric)
         self.n_spa_flann = pyflann.FLANN()
-        self.spa_flann = pyflann.FLANN()
+        # self.spa_flann = pyflann.FLANN()
         if index_filename:
             self.n_spa_flann.load_index(index_filename[0], self.hists_reduced)
-            self.spa_flann.load_index(index_filename[1], self.spa_hists_reduced)
+            # self.spa_flann.load_index(index_filename[1], self.spa_hists_reduced)
         else:
             self.params = self.n_spa_flann.build_index(
                 self.hists_reduced, algorithm='autotuned',
-                sample_fraction=0.3, target_precision=.8,
+                sample_fraction=0.98, target_precision=0.98,
                 build_weight=0.01, memory_weight=0.)
             # self.spa_params = self.flann.build_index(
             #     self.spa_hists_reduced, algorithm='autotuned',
             #     sample_fraction=0.3, target_precision=.8,
             #     build_weight=0.01, memory_weight=0.)
-            self.spa_params = self.spa_flann.build_index(
-                self.spa_hists_reduced, algorithm='autotuned',
-                sample_fraction=0.3, target_precision=.8,
-                build_weight=0.01, memory_weight=0.)
-        print(self.params, self.spa_params)
+            # self.spa_params = self.spa_flann.build_index(
+            #     self.spa_hists_reduced, algorithm='autotuned',
+            #     sample_fraction=1, target_precision=1,
+            #     build_weight=0.01, memory_weight=0.)
+        # print(self.params, self.spa_params)
+        print(self.params)
         tt.toc('build_index')
         return self
 

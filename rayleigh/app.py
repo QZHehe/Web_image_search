@@ -71,8 +71,13 @@ fname_dict = {
     #     'Euclidean, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
     # 'data/test1_CKDTree_euclidean_16_0.pickle': (
     #     'Euclidean, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
-    'data/test1_flann_euclidean_16_0.pickle': (
-        'Euclidean, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
+    # 'data/test1_flann_euclidean_16_0.pickle': (
+    #     'euclidean, sigma=16, FLANN', rayleigh.SearchableImageCollectionFLANN),
+    # 'data/test1_Exact_euclidean_16_0.pickle': (
+    #     'Euclidean, sigma=16, Exact', rayleigh.SearchableImageCollectionExact),
+    'data/test1_CKDTree_euclidean_16_0.pickle': (
+        'Euclidean, sigma=16, CKDTree', rayleigh.SearchableImageCollectionCKDTree),
+
 
 }
 
@@ -179,11 +184,11 @@ def search_by_image(sic_type, fea_type, tex_type, image_id):
 def search_by_image_json(sic_type,fea_type, tex_type,image_id):
     sic = sics[sic_type]
     if fea_type == 'color':
-        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'color', tex_type, 10)
+        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'color', tex_type, 100)
     elif fea_type == 'colorSpatial':
-        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'colorSpatial', tex_type, 10)
+        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'colorSpatial', tex_type, 100)
     elif fea_type == 'colorMap':
-        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'colorMap', tex_type, 10)
+        query_data, results, time_elapsed = sic.search_by_image_in_dataset(image_id, 'colorMap', tex_type, 100)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed})
 
@@ -272,7 +277,9 @@ def upload_image():
             img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
             color_hist = color_hist.tolist()
         elif fea_type == 'colorSpatial':
-            color_hist = img.get_spatial_features()
+            color_hist = util.histogram_colors_smoothed(
+            img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
+            color_hist = color_hist.tolist()
         elif fea_type == 'colorMap':
             # 颜色直方图
             color_hist = util.histogram_colors_smoothed(
@@ -281,11 +288,12 @@ def upload_image():
             # 颜色分布图
         color_map = img.spatial_color_map_feature(sic.ic.palette)
         hash = img.get_texture()
+        spa_color_hist = img.get_spatial_features()
     return render_template(
         'search_by_upload.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist, hash=hash, color_map=color_map.tolist(), dui=dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
+        color_hist=color_hist, hash=hash, color_map=color_map.tolist(),spa_color_hist=spa_color_hist, dui=dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
 
 
 @app.route('/draw_image', methods=['POST'])
@@ -307,13 +315,17 @@ def draw_image():
                 img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
             color_hist = color_hist.tolist()
         elif fea_type == 'colorSpatial':
-            color_hist = img.get_spatial_features()
+            color_hist = util.histogram_colors_smoothed(
+                img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
+            color_hist = color_hist.tolist()
+
         elif fea_type == 'colorMap':
             # 颜色直方图
             color_hist = util.histogram_colors_smoothed(
             img.lab_array, sic.ic.palette, sigma=sigma, direct=False)
             color_hist = color_hist.tolist()
             # 颜色分布图
+        spa_color_hist = img.get_spatial_features()
         color_map = img.spatial_color_map_feature(sic.ic.palette)
         hash = img.get_texture()
         os.remove('./image/imgout.png')
@@ -321,7 +333,7 @@ def draw_image():
         'show_draw_image.html',
         sic_types=sorted(sics.keys()), sic_type=sic_type,
         sigmas=sigmas, sigma=sigma,
-        color_hist=color_hist, hash=hash, color_map=color_map.tolist(), dui=image_dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
+        color_hist=color_hist,spa_color_hist = spa_color_hist, hash=hash, color_map=color_map.tolist(), dui=image_dui, features=features, fea_type=fea_type, texture=texture, tex_type=tex_type)
 
 
 @app.route('/upload_image_json/<sic_type>/<fea_type>/<tex_type>/<int:sigma>')
@@ -332,26 +344,29 @@ def upload_image_json(sic_type, fea_type, tex_type, sigma):
         return make_json_response({'message': 'no request data'}, 400)
     hash = request.args.get('hash', '')
     color_map = request.args.get('color_map', '')
+    spa_color_hist = request.args.get('spa_color_hist', '')
     if hash is "":
         return make_json_response({'message': 'no request data'}, 400)
     color_hist=np.array(unquote(color_hist[1:-1]).split(','), 'float')
+    spa_color_hist =np.array(unquote(spa_color_hist[1:-1]).split(','), 'float')
     color_map = np.array(unquote(color_map[2:-2]).replace('], [', ', ').split(','), 'float').reshape([13, 64])
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
     if fea_type == 'color':
         if tex_type == 'no':
-            results, time_elapsed = sic.search_by_color_hist(color_hist, 70)
+            results, time_elapsed = sic.search_by_color_hist(color_hist, 100)
         else:
-            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 70)
+            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 100)
     elif fea_type == 'colorSpatial':
         if tex_type == 'no':
-            results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, 70)
+            results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, spa_color_hist,100)
         else:
-            results, time_elapsed = sic.search_by_color_spatial_hist_texture(color_hist, hash, 70)
+            # results, time_elapsed = sic.search_by_color_spatial_hist_texture(color_hist, spa_color_hist, hash, 100)
+            results, time_elapsed = sic.search_by_color_spatial_hist(color_hist, spa_color_hist,100)
     elif fea_type == 'colorMap':
         if tex_type == 'no':
-            results, time_elapsed = sic.search_by_color_map(color_hist, color_map, 70)
+            results, time_elapsed = sic.search_by_color_map(color_hist, color_map, 100)
         else:
-            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 70)
+            results, time_elapsed = sic.search_by_color_hist_texture(color_hist, hash, 100)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
 
