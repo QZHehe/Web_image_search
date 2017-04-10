@@ -416,10 +416,24 @@ def color_map_feature_distance(spa_fea1, spa_fea2, color_distance = color_distan
     feature:(13*64)的图像空间颜色特征
 
     """
-    result = np.dot(np.array(spa_fea1), np.array(spa_fea2).T)
-    result2 = np.dot(result, color_distance)
-    distance = np.trace(result2)
+    # result = np.dot(np.array(spa_fea1), np.array(spa_fea2).T)
+    # result2 = np.dot(result, color_distance)
+    # distance = np.trace(result2)
+    # return distance
+    spa_fea1= np.array(spa_fea1)
+    result1 = np.dot(np.array(spa_fea1), np.array(spa_fea2).T)
+    spa_fea1[spa_fea1 == 0] = 2
+    spa_fea1[spa_fea1 == 1] = 0
+    spa_fea1[spa_fea1 == 2] = 1
+    spa_fea2[spa_fea2 == 0] = 2
+    spa_fea2[spa_fea2 == 1] = 0
+    spa_fea2[spa_fea2 == 2] = 1
+    result2 = np.dot(np.array(spa_fea1), np.array(spa_fea2).T)
+    result = result1 + result2
+    result3 = np.dot(result, color_distance)
+    distance = np.trace(result3)
     return distance
+
 
 
 def modify_spatial_feature(feature):
