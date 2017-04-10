@@ -6,5 +6,7 @@ rayleigh/static/dataset
 rayleigh/*.pyc
 .idea
 rayleigh/static/pic
+rayleigh/static/all
+rayleigh/static/img1_0_3
 rayleigh/pyflann/*.pyc
 pyflann/*.pyc
