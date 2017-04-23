@@ -177,7 +177,7 @@ class SearchableImageCollection(object):
             if texture == 'no':
                 color_map = self.ic.get_hash(img_id, no_hist=True)['color_map']
                 color_hist = self.get_image_hist(img_id)
-                results, time_elapsed = self.search_by_color_map(color_hist, color_map, 70)
+                results, time_elapsed = self.search_by_color_map(color_hist, color_map, 100)
             else:
                 hash = str(self.ic.get_hash(img_id, no_hist=True)['hash'])
                 color_hist = self.get_image_hist(img_id)

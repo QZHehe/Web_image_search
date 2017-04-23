@@ -391,9 +391,10 @@ def search_by_drawing(sic_type, fea_type, sigma):
 def modify_image(sic_type,image_id):
     image = sics[sic_type].ic.get_image(image_id, no_hist=True)
     root = os.path.dirname(__file__)
-    img = rayleigh.ImageModify(root+image['url'],image['id'])
+    # img = rayleigh.ImageModify(root+image['url'],image['id'])
+    img = rayleigh.ImageModify(os.path.dirname(__file__) + '/static/' + image['url'], image['id'])
     return render_template(
         'modify_image.html', image_url=img.dui)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
