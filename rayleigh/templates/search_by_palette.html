@@ -3,11 +3,10 @@
 {% block title %}调色板颜色检索{% endblock %}
 {% block head %}
 {{ super() }}
-
 {% endblock %}
 {% block content %}
 <div class="container">
-    <div class="row">
+    <div class="row col-md-3">
         <div id="palette_search">
             <form id="palette_search_form" action='#'>
                 <div class="row">
@@ -26,6 +25,8 @@
             </form>
         </div>
     </div>
+    <div id="results" class="row col-md-9">
+    </div>
 </div>
 
 <div id>
@@ -35,11 +36,11 @@
     <div class="row">
         <div class="col-md-offset-6">
             <ul class="pagination ">
-                <li><a href="#">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">4</a></li>
-                <li><a href="#">5</a></li>
+                <li><a href="#" class="page" name="1" >1</a></li>
+                <li><a href="#" class="page" name="2" >2</a></li>
+                <li><a href="#" class="page" name="3" >3</a></li>
+                <li><a href="#" class="page" name="4" >4</a></li>
+                <li><a href="#" class="page" name="5" >5</a></li>
             </ul>
         </div>
     </div>
@@ -83,6 +84,7 @@
       var sigma = "{{ sigma }}";
       var fea_type = "color";
       var colors = {{ colors }} || {};
+      var newAbsolutePage = '1';
       colors_str = Object.keys(colors).join(',');
       $('#palette_search_form_hidden_colors').val(colors_str);
       // Add selected colors lable
@@ -107,12 +109,12 @@
         colors_str = Object.keys(colors).join(',');
         $('#palette_search_form_hidden_colors').val(colors_str);
       };
-      $('a').each(function(i,el) {
+      $('#palette_search_form_colors').children("a").each(function(i,el) {
         el.onclick = toggleSelected;
       });
-      // Make the request for the palette query histogram and image results.
-      var display_results = function(json_data) {
+      function display_results(json_data,num) {
         // note: sprintf does not work in the below line
+        var num = parseInt(num);
         $('#palette_query').html(
           '<img width="240px" src="data:image/png;base64,' + json_data['pq_hist'] + '" />'
         );
@@ -120,11 +122,25 @@
       }
       var search_url = sprintf(
         '/search_by_palette_json/%s/%s', sic_type, sigma);
+
       $.getJSON(search_url, data = {
           'colors': getObjectKeys(colors).join(','),
           'values': getObjectValues(colors).join(',')
               },
-          success=display_results);
+          function(result){
+              display_results(result,'1')
+          }
+        );
+        $('.page').click(function (event) {
+            var newAbsolutePage = this.innerHTML;
+            $.getJSON(search_url, data = {
+                        'colors': getObjectKeys(colors).join(','),
+                        'values': getObjectValues(colors).join(',')
+                    },
+                    function (json_data) {
+                        display_results(json_data, newAbsolutePage);
+                    })});
+
     });
   </script>
     {{ moment.include_moment() }}

@@ -164,7 +164,7 @@ def search_by_palette_json(sic_type, sigma):
     color_hist = util.histogram_colors_smoothed(
         pq.lab_array, sic.ic.palette, sigma=sigma, direct=False)
     b64_hist = util.output_histogram_base64(color_hist, sic.ic.palette)
-    results, time_elapsed = sic.search_by_color_hist(color_hist, 10)
+    results, time_elapsed = sic.search_by_color_hist(color_hist, 100)
     return make_json_response({
         'results': results, 'time_elapsed': time_elapsed, 'pq_hist': b64_hist})
 

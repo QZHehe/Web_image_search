@@ -20,34 +20,51 @@ function addShowSelectedColors(colors)
 {
     for (var color in colors)
     {
-        $colorName=color.replace('#','')
-        $colorAdd = '<span id="show_'+$colorName+'"><a><span style="background-color: ';
-        $colorAdd+= color+' " /></a>'
-        $colorAdd+='<input class="input_value" value="'+colors[color]+'" /></span>'
+        $colorName = color.replace('#', '')
+        $colorAdd = '<div class="row" id="show_' + $colorName + '">';
+        $colorAdd += '<div class="colorPercetage"></div></div>';
         $('#show_select_colors').append($colorAdd);
+        var name = 'show_' + $colorName;
+        $('#' + name).find('.colorPercetage').slider({
+            orientation: "horizontal",
+            range: "min",
+            max: 255,
+            value: (colors[color]*255),
+        });
+        $('#'+name).children().children(".ui-slider-range").css('background',color)
+
     }
 
 }
 function addShowSelectedColor(color)
 {
-
     $colorName=color.id.replace('#','')
-    $colorAdd = '<span id="show_'+$colorName+'"><a><span style="background-color: ';
-    $colorAdd+= color.id+' " /></a>'
-    $colorAdd+='<input class="input_value" value="" /></span>'
+    $colorAdd = '<div class="row" id="show_'+$colorName+'">';
+    // $colorAdd+= color.id+' " /></a>';
+    $colorAdd+='<div class="colorPercetage"></div></div>';
     $('#show_select_colors').append($colorAdd);
+    var name = 'show_'+$colorName;
+    $('#'+name).find('.colorPercetage').slider({
+          orientation: "horizontal",
+          range: "min",
+          max: 255,
+          value: 127,
+      });
+    $('#'+name).children().children(".ui-slider-range").css('background',color.id)
+
+
 }
 function deleteShowSelectedColor(color)
 {
     $colorName=color.id.replace('#','')
     $colorDelete='show_'+$colorName;
     $('#'+$colorDelete).remove();
-}
+} 
 function getValues()
 {
     var values = [];
-    $('input.input_value').each(function(){
-        values.push(parseFloat(this.value));
+    $('.colorPercetage').each(function(){
+        values.push(parseFloat($(this).slider('value')));
     });
     return values;
 }

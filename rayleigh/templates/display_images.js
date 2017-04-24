@@ -1,4 +1,6 @@
-var items = $.map(json_data['results'], function(val, i) {
+var show_results = json_data['results'].slice((num-1)*20,num*20);
+// var items = $.map(json_data['results'], function(val, i) {
+var items = $.map(show_results, function(val, i) {
   var id = val['id'];
   var url = val['url'];
   var distance = sprintf('%.2f', val['distance']);
