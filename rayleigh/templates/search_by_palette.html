@@ -3,6 +3,7 @@
 {% block title %}调色板颜色检索{% endblock %}
 {% block head %}
 {{ super() }}
+
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -36,7 +37,7 @@
     <div class="row">
         <div class="col-md-offset-6">
             <ul class="pagination ">
-                <li><a href="#" class="page" name="1" >1</a></li>
+                <li id='page1'><a href="#" class="page" name="1" >1</a></li>
                 <li><a href="#" class="page" name="2" >2</a></li>
                 <li><a href="#" class="page" name="3" >3</a></li>
                 <li><a href="#" class="page" name="4" >4</a></li>
@@ -120,26 +121,30 @@
         );
         {% include 'display_images.js' %}
       }
-      var search_url = sprintf(
-        '/search_by_palette_json/%s/%s', sic_type, sigma);
+        $('#page1').addClass("active")
+        var search_url = sprintf(
+                '/search_by_palette_json/%s/%s', sic_type, sigma);
 
-      $.getJSON(search_url, data = {
-          'colors': getObjectKeys(colors).join(','),
-          'values': getObjectValues(colors).join(',')
-              },
-          function(result){
-              display_results(result,'1')
-          }
+        $.getJSON(search_url, data = {
+                    'colors': getObjectKeys(colors).join(','),
+                    'values': getObjectValues(colors).join(',')
+                },
+                function (result) {
+                    display_results(result, '1')
+                }
         );
         $('.page').click(function (event) {
             var newAbsolutePage = this.innerHTML;
+            $(this).parent().siblings().removeClass("active");
+            $(this).parent().addClass("active");
             $.getJSON(search_url, data = {
                         'colors': getObjectKeys(colors).join(','),
                         'values': getObjectValues(colors).join(',')
                     },
                     function (json_data) {
                         display_results(json_data, newAbsolutePage);
-                    })});
+                    })
+        });
 
     });
   </script>

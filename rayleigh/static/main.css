@@ -55,7 +55,7 @@ body {
 
 div.result {
   display: inline-block;
-  margin: 5px;
+  margin: 0px;
 }
 .result {
   padding-top: -3px;
@@ -100,4 +100,9 @@ div.result {
     clear: left;
     width: 150px;
     margin: 10px;
+}
+
+#results{
+  margin-top:-10px;
+  margin-bottom:100px;
 }
