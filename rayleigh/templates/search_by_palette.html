@@ -1,63 +1,60 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Search by palette</title>
+<meta charset="UTF-8">
+{% extends "base.html" %}
+{% block title %}调色板颜色检索{% endblock %}
+{% block head %}
+{{ super() }}
+
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div id="palette_search">
+            <form id="palette_search_form" action='#'>
+                <div class="row">
+                <div id="palette_search_form_colors">
+                    <h3>颜色选择</h3>
+                    {% include 'palette.html' %}
+                    <input type="hidden" id="palette_search_form_hidden_colors" name="colors" value=""/>
+                </div>
+                </div>
+                <div class="row">
+                <div id="show_select_colors">
+                    <h3>选择颜色比例</h3>
+                </div>
+                </div>
+                <input id="palette_search_form_submit" type="submit" value="检索图像"/>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id>
+
+</div>
+<div class="container navbar-fixed-bottom">
+    <div class="row">
+        <div class="col-md-offset-6">
+            <ul class="pagination ">
+                <li><a href="#">1</a></li>
+                <li><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+                <li><a href="#">4</a></li>
+                <li><a href="#">5</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+<script src="/static/jquery-1.8.3.js"></script>
+<script src="/static/sprintf-0.7-beta1.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+  <link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
   <link href="/static/main.css" media="all" rel="stylesheet" type="text/css"/>
   <script src="/static/search_by_palette.js"></script>
-</head>
-<body>
-  <div id="content">
-    <!-- The left sidebar: palette selection and histogram display. -->
-    <div id="search_sidebar">
-      <div id="palette_search">
-        <form id="palette_search_form" action='#'>
-          <div id="palette_search_form_colors">
-            <h3>Colors</h3>
-            {% include 'palette.html' %}
-            <input type="hidden" id="palette_search_form_hidden_colors" name="colors" value="" />
-          </div>
-          <div id="show_select_colors">
-              <h3>Selected Colors & Percentages</h3>
-          </div>
-          <div id="palette_search_form_sic_types">
-            <h3>Search Method</h3>
-            {% for st in sic_types %}
-              <input type="radio" name="sic_type" value="{{ st }}" {{ 'checked' if st == sic_type else '' }}>{{ st }}<br />
-            {% endfor %}
-
-            <h3>Palette Smoothing</h3>
-            {% for s in sigmas %}
-              <input type="radio" name="sigma" value={{ s }} {{ 'checked' if s == sigma else '' }}>{{ s }}<br />
-            {% endfor %}
-          </div>
-          <input id="palette_search_form_submit" type="submit" value="Search" />
-        </form>
-      </div>
-      <hr />
-      <div id="upload_image">
-          <a href="/search_by_upload">Seach by upload image</a>
-      </div>
-      <div id="draw_image">
-          <a href="/search_by_drawing">Seach by draw image</a>
-      </div>
-      <div>
-          <a href="/main">图片分享区</a>
-      </div>
-        <div id="palette_histogram">
-        <h3>Palette histogram</h3>
-        <div id="palette_query"></div>
-      </div>
-    </div>
-
-    <!-- Main area: returned images. -->
-    <div id="images">
-      <h3>Matching images</h3>
-      <div id="results">
-      </div>
-    </div>
-  </div>
-  <script src="/static/jquery-1.8.3.js"></script>
-  <script src="/static/sprintf-0.7-beta1.js"></script>
   <script>
     $(document).ready(function() {
       // Add a simple URL query string parser to jQuery.
@@ -69,8 +66,10 @@
 
       // Add form submission JS.
       $('#palette_search_form').submit(function() {
-        var sic_type = $("#palette_search_form input[name='sic_type']:checked").val();
-        var sigma = $("#palette_search_form input[name='sigma']:checked").val();
+//        var sic_type = $("#palette_search_form input[name='sic_type']:checked").val();
+//        var sigma = $("#palette_search_form input[name='sigma']:checked").val();
+        var sic_type = "Euclidean, sigma=16, CKDTree";
+        var sigma = '16';
         var colors = $('#palette_search_form_hidden_colors').serialize();
         var values = getValues();
         values=encodeURIComponent(values.join(","));
@@ -128,5 +127,5 @@
           success=display_results);
     });
   </script>
-</body>
-</html>
+    {{ moment.include_moment() }}
+{% endblock %}

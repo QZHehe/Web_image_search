@@ -17,6 +17,7 @@ table, caption, tbody, tfoot, thead, tr, th, td {
 }
 body {
   line-height: 1;
+  margin-top: 70px;
   color: black;
   background: white;
 }
@@ -84,7 +85,7 @@ div.result {
   width: 18px;
   height: 18px;
   border: 3px solid black;
-  margin: -3px;
+  /*margin: -3px;*/
   padding: 0px;
 }
 
@@ -92,4 +93,11 @@ div.result {
   display: inline-block;
   width: 100%;
   height: 100%;
+}
+
+.colorPercetage {
+    float: left;
+    clear: left;
+    width: 150px;
+    margin: 10px;
 }
