@@ -20,32 +20,90 @@
                  <input id="uploadImage" type="file" name="myPhoto" onchange="loadImageFile();"/></td>
 
                 <div id="palette_search_form_sic_types">
-                    <h3>选择检索方式</h3>
-                    <table class="table table-striped">
-                        不含空间关系
-                    <input type="radio" name="search_type" value="type1" checked="checked"/>
-                        <br/>
-                        方式一：颜色更相似(空间直方图)
-                    <input type="radio" name="search_type" value="type2" />
-                        <br/>
-                        方式二：颜色分布更相似(主颜色分布图)
-                    <input type="radio" name="search_type" value="type3" />
-                        <br/>
-                        方式一：缩略图(差异哈希特征)
-                    <input type="radio" name="search_type" value="type4" />
-                        <br/>
-                    </table>
+                    <div class="list-group">
+                        <a  id="lable1" class="list-group-item active ">
+                            <div class="row tag">
+                            <h1 class="list-group-item-heading ">
+                                选择检索方式
+                            </h1>
+                            </div>
+                        </a>
+                            <a id="lable2"class="list-group-item active ">
+                            <div class="row tag">
+                            <h4 class="list-group-item-heading ">
+                                颜色比例（不包含空间关系）
+                            </h4>
+                            </div>
+                        </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                颜色比例
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type1" checked="checked"/>
+                            </div>
+                        </a>
+                        <a  id="lable3" class="list-group-item active">
+                            <div class="row tag">
+                            <h4 class="list-group-item-heading ">
+                                颜色比例（包含空间关系）
+                            </h4>
+                            </div>
+                        </a>
+                        <a class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式一：偏重颜色相似
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type2" checked="checked"/>
+                            </div>
+                        </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式二：偏重分布相似
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type3" checked="checked"/>
+                            </div>
+                        </a>
+                        <a id="lable4" class="list-group-item active">
+                            <div class="row tag">
+                            <h4 class="list-group-item-heading ">
+                                结合颜色与纹理
+                            </h4>
+                            </div>
+                        </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式一
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type4" checked="checked"/>
+                            </div>
+                        </a>
+                    </div>
                     <input type="hidden" name="sic_type" value = "Euclidean, sigma=16, CKDTree"/>
                     <input type="hidden" name="sigma" value = '16'/>
                     <input type="hidden" id='fea_type' name="fea_type"/>
                     <input type="hidden" id='tex_type' name="tex_type"/>
                 </div>
-                <p><input id='upload_value' type="button" value="检索图像"/></p>
+                <input id='upload_value' class="btn btn-inverse" type="button" value="检索图像"/>
             </form>
         </div>
         <div>
             <div id="show_upload_image">
             </div>
+        </div>
+        <div id="palette_histogram">
+            <div id="palette_query"></div>
         </div>
     </div>
     <div id="results" class="row col-md-9">
@@ -91,7 +149,7 @@
         var dui = "{{dui|safe}}" || "";
         if (dui !== "") {
             $('#show_upload_image').html(
-                    '<img width="100px" src=' + dui + ' />'
+                    '<div class="row lable"><h4>上传图像</h4></div><div class="col-md-offset-1"><img width="200px" src=' + dui + ' /></div>'
             );
         }
         var check_type = fea_type+tex_type;
@@ -135,7 +193,8 @@
         // note: sprintf does not work in the below line
         var num = parseInt(num);
         $('#palette_query').html(
-          '<img width="240px" src="data:image/png;base64,' + json_data['pq_hist'] + '" />'
+
+          '<div class="row lable"><h4>上传图像颜色直方图</h4></div><img width="240px" src="data:image/png;base64,' + json_data['pq_hist'] + '" />'
         );
         {% include 'display_images.js' %}
       }
