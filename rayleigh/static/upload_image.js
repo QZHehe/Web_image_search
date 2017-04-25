@@ -10,6 +10,6 @@ oFReader.onload = function (oFREvent) {
 function loadImageFile() {
   if (document.getElementById("uploadImage").files.length === 0) { return; }
   var oFile = document.getElementById("uploadImage").files[0];
-  if (!rFilter.test(oFile.type)) { alert("You must select a valid image file!"); return; }
+  if (!rFilter.test(oFile.type)) { alert("请选择有效文件^,^!"); return; }
   oFReader.readAsDataURL(oFile);
 }
