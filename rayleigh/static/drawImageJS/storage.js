@@ -30,8 +30,11 @@ function item(imgurl,i){
         '<a href="javascript:void(0);" id="history_del_'+i+'">删除</a>' +
         '<a href="'+imgurl+'" id="history_download_'+i+'" download="picture.png">下载</a>'+
         '</div>';
+	var itemHtml_show='<div class="item"><img src = '+imgurl+' id="history_'+i+'"/>'+
+        '</div>';
 	$("#showHistory h2").after(itemHtml).fadeIn(400);
     $("#search_by_draw_image").attr("value",imgurl);
+	$('#show_image').html(itemHtml_show);
 }
 
 //保存图片，base64格式

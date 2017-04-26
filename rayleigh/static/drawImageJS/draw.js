@@ -5,8 +5,8 @@ var context ;
 var canvas_bak;
 var context_bak;
 
-var canvasWidth = 960;
-var canvasHeight = 580;
+var canvasWidth = 712;
+var canvasHeight = 412;
 
 var canvasTop;
 var canvasLeft;
@@ -52,8 +52,9 @@ var draw_graph = function(graphType,obj){
 			context.lineTo(startX +1 ,startY+1);
 			context.stroke();	
 			
-		}else if(graphType == 'rubber'){							
-			context.clearRect(startX - size * 10 ,  startY - size * 10 , size * 20 , size * 20);				
+		}else if(graphType == 'rubber'){
+			context.fillStyle="#FFFFFF";
+			context.fillRect(startX - size * 10 ,  startY - size * 10 , size * 20 , size * 20);
 		}	
 		// 阻止点击时的cursor的变化，draw
 		e=e||window.event;
@@ -175,8 +176,9 @@ var draw_graph = function(graphType,obj){
 			context_bak.lineTo(x - size * 10  , y + size * 10 );
 			context_bak.lineTo(x - size * 10  , y - size * 10 );	
 			context_bak.stroke();		
-			if(canDraw){							
-				context.clearRect(x - size * 10 ,  y - size * 10 , size * 20 , size * 20);
+			if(canDraw){
+				context.fillStyle="#FFFFFF";
+				context.fillRect(x - size * 10 ,  y - size * 10 , size * 20 , size * 20);
 										
 			}			
 		}
@@ -206,9 +208,13 @@ var draw_graph = function(graphType,obj){
 var clearContext = function(type){
 	if(!type){
 		context_bak.clearRect(0,0,canvasWidth,canvasHeight);
+
 	}else{
-		context.clearRect(0,0,canvasWidth,canvasHeight);
-		context_bak.clearRect(0,0,canvasWidth,canvasHeight);
+		context.fillStyle="#FFFFFF";
+		context_bak.fillStyle="#FFFFFF";
+		context.fillRect(0,0,canvasWidth,canvasHeight);
+		context_bak.fillRect(0,0,canvasWidth,canvasHeight);
 	}
+
 }
 

@@ -99,7 +99,8 @@
 		canvas_bak =  document.getElementById("canvas_bak");
 		canvas_bak.width = canvasWidth;
 		canvas_bak.height = canvasHeight;
-		context_bak = canvas_bak.getContext('2d');		
+		context_bak = canvas_bak.getContext('2d');
+		fill_white();
 	}	
 
 	
@@ -112,8 +113,8 @@
 	//展开线条大小选择器
 	var showLineSize = function(obj){
 		if($("#line_size").is(":hidden")){
-			var top = $(obj).offset().top+40;
-			var left = $(obj).offset().left-10;				
+			var top = $(obj).offset().top-$(".pencil").offset().top+55;
+			var left = $(obj).offset().left-$(".pencil").offset().left+40;
 			$("#line_size")[0].style.left = left + "px";
 			$("#line_size")[0].style.top = top   + "px";
 			$("#line_size").show();
@@ -143,7 +144,21 @@
 			clearContext();
 			saveImageToAry();
 	}
+    //填充白色背景
+	var fill_white=function(){
+		context.fillStyle= '#FFFFFF';
+		context_bak.fillStyle= '#FFFFFF';
+		var $canvas = $("#canvas"),
+			w = $canvas.width(),
+			h = $canvas.height();
+			context.fillRect(0, 0, w, h);
 
+			var image = new Image();
+			image.src = canvas_bak.toDataURL();
+			context.drawImage(image , 0 ,0 , image.width , image.height , 0 ,0 , canvasWidth , canvasHeight);
+			clearContext();
+			saveImageToAry();
+	}
 
 	//撤销上一个操作
 	var cancel = function(){

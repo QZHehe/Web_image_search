@@ -125,44 +125,44 @@
 				for(var i=0;i<halfOfAllArray1.length;i++){
 					allColorArray[i + 2] = halfOfAllArray1[i].concat(halfOfAllArray2[i]);
 				}
-				allColorArray[0][0]  = new RGB(255,85,85);
-				allColorArray[1][0]  = new RGB(255,187,85);
-				allColorArray[2][0]  = new RGB(255,238,85);
-				allColorArray[3][0]  = new RGB(139,255,85);
-				allColorArray[4][0]  = new RGB(85,255,248);
-				allColorArray[5][0]  = new RGB(85,214,255);
-				allColorArray[6][0]  = new RGB(85,153,255);
-				allColorArray[7][0]  = new RGB(85,92,255);
-				allColorArray[8][0]  = new RGB(180,85,255);
-				allColorArray[9][0]  = new RGB(255,85,218);
-				allColorArray[10][0]  = new RGB(219,219,219);
-
-				allColorArray[0][1] = new RGB(255,0,0);
-				allColorArray[1][1]  = new RGB(255,153,0);
-				allColorArray[2][1]  = new RGB(255,229,0);
-				allColorArray[3][1]  = new RGB(82,255,0);
-				allColorArray[4][1]  = new RGB(00,255,240);
-				allColorArray[5][1]  = new RGB(00,194,255);
-				allColorArray[6][1]  = new RGB(00,102,255);
-				allColorArray[7][1]  = new RGB(00,10,255);
-				allColorArray[8][1]  = new RGB(143,0,255);
-				allColorArray[9][1]  = new RGB(255,0,199);
-				allColorArray[10][1] = new RGB(182,182,182);
-				allColorArray[11][1]  = new RGB(255,255,255);
-				allColorArray[12][1]  = new RGB(0,0,0);
-
-				allColorArray[0][2]  = new RGB(204,0,0);
-				allColorArray[1][2]  = new RGB(204,122,0);
-				allColorArray[2][2]  = new RGB(204,184,0);
-				allColorArray[3][2]  = new RGB(65,204,0);
-				allColorArray[4][2]  = new RGB(0,204,192);
-				allColorArray[5][2]  = new RGB(0,155,204);
-				allColorArray[6][2]  = new RGB(0,82,204);
-				allColorArray[7][2]  = new RGB(0,8,204);
-				allColorArray[8][2]  = new RGB(114,0,204);
-				allColorArray[9][2]  = new RGB(204,0,159);
-				allColorArray[10][2]  = new RGB(146,146,146);
-				
+				// allColorArray[0][0]  = new RGB(255,85,85);
+				// allColorArray[1][0]  = new RGB(255,187,85);
+				// allColorArray[2][0]  = new RGB(255,238,85);
+				// allColorArray[3][0]  = new RGB(139,255,85);
+				// allColorArray[4][0]  = new RGB(85,255,248);
+				// allColorArray[5][0]  = new RGB(85,214,255);
+				// allColorArray[6][0]  = new RGB(85,153,255);
+				// allColorArray[7][0]  = new RGB(85,92,255);
+				// allColorArray[8][0]  = new RGB(180,85,255);
+				// allColorArray[9][0]  = new RGB(255,85,218);
+				// allColorArray[10][0]  = new RGB(219,219,219);
+                //
+				// allColorArray[0][1] = new RGB(255,0,0);
+				// allColorArray[1][1]  = new RGB(255,153,0);
+				// allColorArray[2][1]  = new RGB(255,229,0);
+				// allColorArray[3][1]  = new RGB(82,255,0);
+				// allColorArray[4][1]  = new RGB(00,255,240);
+				// allColorArray[5][1]  = new RGB(00,194,255);
+				// allColorArray[6][1]  = new RGB(00,102,255);
+				// allColorArray[7][1]  = new RGB(00,10,255);
+				// allColorArray[8][1]  = new RGB(143,0,255);
+				// allColorArray[9][1]  = new RGB(255,0,199);
+				// allColorArray[10][1] = new RGB(182,182,182);
+				// allColorArray[11][1]  = new RGB(255,255,255);
+				// allColorArray[12][1]  = new RGB(0,0,0);
+                //
+				// allColorArray[0][2]  = new RGB(204,0,0);
+				// allColorArray[1][2]  = new RGB(204,122,0);
+				// allColorArray[2][2]  = new RGB(204,184,0);
+				// allColorArray[3][2]  = new RGB(65,204,0);
+				// allColorArray[4][2]  = new RGB(0,204,192);
+				// allColorArray[5][2]  = new RGB(0,155,204);
+				// allColorArray[6][2]  = new RGB(0,82,204);
+				// allColorArray[7][2]  = new RGB(0,8,204);
+				// allColorArray[8][2]  = new RGB(114,0,204);
+				// allColorArray[9][2]  = new RGB(204,0,159);
+				// allColorArray[10][2]  = new RGB(146,146,146);
+				//
 				//将数组里所有的RGB颜色转换成Hex形式
 				for(var i=0;i<allColorArray.length;i++){
 					for(var j=0;j<allColorArray[i].length;j++){
