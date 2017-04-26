@@ -1,100 +1,208 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Search by image</title>
+<meta charset="UTF-8">
+{% extends "base.html" %}
+{% block title %}浏览检索{% endblock %}
+{% block head %}
+{{ super() }}
   <link href="/static/main.css" media="all" rel="stylesheet" type="text/css"/>
-</head>
-<body>
-  <div id="content">
-    <!-- The left sidebar: image and histogram display. -->
-    <div id="search_sidebar">
-      <img src={{'/static/'+ image_url }} />
-
-      <form id="search_form" action='#'>
-        <h3>Search Method</h3>
-        {% for st in sic_types %}
-        <input type="radio" name="sic_type" value="{{ st }}" {{ 'checked' if st == sic_type else '' }}>{{ st }}<br/>
-        {% endfor %}
-        <h3>Feature</h3>
-        {% for f in features %}
-        <input type="radio" name="fea_type" value="{{ f }}" {{ 'checked' if f == fea_type else '' }}>{{ f
-        }}<br/>
-        {% endfor %}
-        <h3>Texture</h3>
-        {% for t in texture %}
-        <input type="radio" name="tex_type" value="{{ t }}" {{ 'checked' if t == tex_type else '' }}>{{ t
-        }}<br/>
-        {% endfor %}
-
-
-        <input id="search_form_submit" type="submit" value="Search" />
-      </form>
-      
-      <hr />
-      <div id="histogram">
-        <h3>Smoothed histogram</h3>
-        <img width="240px" src="/image_histogram/{{ sic_type }}/0/{{ image_id }}.png" />
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row col-md-3">
+        <div class="row lable">
+          <h4>检索图像</h4>
+        </div>
+      <div class="col-md-offset-1 show_image">
+        <img width="200px" src={{'/static/'+ image_url }} />
       </div>
-
-      <div id="raw-histogram">
-        <h3>Raw histogram</h3>
-        <img width="240px" src="/image_histogram/{{ sic_type }}/1/{{ image_id }}.png" />
-      </div>
-
-      <div id="palette_image">
-        <h3>Palette image</h3>
-        <img width="240px" src="/palette_image/{{ sic_type }}/{{ image_id }}.png" />
-      </div>
-      <div>
-          <a href="/search_by_drawing">Seach by draw image</a>
-      </div>
-      <div>
-          <a href="/search_by_upload">Seach by upload image</a>
-      </div>
-      <div>
-          <a href="/search_by_palette">Seach by palette</a>
-      </div>
-      <div>
-          <a href="/main">图片分享区</a>
-      </div>
-      <hr />
+        <div id="upload_image">
+            <form id="upload_image_form" name="upload_image_form" action="/upload_image" method='post' enctype='multipart/form-data'>
+               <div id="palette_search_form_sic_types">
+                    <div class="list-group">
+                        <a  id="lable1" class="list-group-item active ">
+                            <div class="row tag">
+                            <h1 class="list-group-item-heading ">
+                                选择检索方式
+                            </h1>
+                            </div>
+                        </a>
+                            <a id="lable2"class="list-group-item active ">
+                            <div class="row tag">
+                            <h4 class="list-group-item-heading ">
+                                颜色比例（不包含空间关系）
+                            </h4>
+                            </div>
+                        </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                颜色比例
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type1" checked="checked"/>
+                            </div>
+                        </a>
+                        <a  id="lable3" class="list-group-item active">
+                            <div class="row tag">
+                            <h4 class="list-group-item-heading ">
+                                颜色比例（包含空间关系）
+                            </h4>
+                            </div>
+                        </a>
+                        <a class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式一：偏重颜色相似
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type2" checked="checked"/>
+                            </div>
+                        </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式二：偏重分布相似
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type3" checked="checked"/>
+                            </div>
+                        </a>
+                        <a id="lable4" class="list-group-item active">
+                            <div class="row tag">
+                            <h4 class="list-group-item-heading ">
+                                结合颜色与纹理
+                            </h4>
+                            </div>
+                        </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式一
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type4" checked="checked"/>
+                            </div>
+                        </a>
+                    </div>
+                    <input type="hidden" name="sic_type" value = "Euclidean, sigma=16, CKDTree"/>
+                    <input type="hidden" name="sigma" value = '16'/>
+                    <input type="hidden" id='fea_type' name="fea_type"/>
+                    <input type="hidden" id='tex_type' name="tex_type"/>
+                </div>
+                <input id='upload_value' class="btn btn-inverse" type="button" value="检索图像"/>
+            </form>
+        </div>
+        <div>
+            <div id="show_upload_image">
+            </div>
+        </div>
+        <div id="palette_histogram">
+          <div class="row lable">
+            <h4>图像颜色直方图</h4>
+          </div>
+          <div id="palette_query">
+            <img width="240px" src="/image_histogram/{{ sic_type }}/0/{{ image_id }}.png"/>
+          </div>
+        </div>
     </div>
-
-    <!-- Main area: returned images. -->
-    <div id="images">
-      <h3>Matching images</h3>
-      <div id="results">
-      </div>
+    <div id="results" class="row col-md-9">
     </div>
-  </div>
+</div>
+<div class="container navbar-fixed-bottom">
+    <div class="row">
+        <div class="col-md-offset-6">
+            <ul class="pagination ">
+                <li id='page1'><a href="#" class="page" name="1" >1</a></li>
+                <li><a href="#" class="page" name="2" >2</a></li>
+                <li><a href="#" class="page" name="3" >3</a></li>
+                <li><a href="#" class="page" name="4" >4</a></li>
+                <li><a href="#" class="page" name="5" >5</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
   <script src="/static/jquery-1.8.3.js"></script>
   <script src="/static/sprintf-0.7-beta1.js"></script>
   <script>
-    $(document).ready(function() {
-      /* Prepare the color palette search form. */
-      var sic_type = "{{ sic_type }}";
+    $(document).ready(function(){
+      var sic_type = "Euclidean, sigma=16, CKDTree";
+      var sigma = "16";
       var image_id = "{{ image_id }}";
       var fea_type = "{{fea_type}}";
       var tex_type = "{{tex_type}}";
-
-      $('#search_form').submit(function() {
-        var sic_type = $("#search_form input[name='sic_type']:checked").val();
-        var fea_type = $("#search_form input[name='fea_type']:checked").val();
-        var tex_type = $("#search_form input[name='tex_type']:checked").val();
+      var check_type = fea_type+tex_type;
+      switch(check_type){
+            case 'colorno':
+                $("input[name='search_type'][value='type1']").attr("checked",true);
+                break;
+            case 'colorSpatialno':
+                $("input[name='search_type'][value='type2']").attr("checked",true);
+                break;
+            case 'colorMapno':
+                $("input[name='search_type'][value='type3']").attr("checked",true);
+                break;
+            case 'coloryes':
+                $("input[name='search_type'][value='type4']").attr("checked",true);
+                break;
+        }
+      $("#upload_value").click(function(){
+        var type = $('input:radio:checked').val();
+        switch (type) {
+          case 'type1':
+            $('#fea_type').val('color');
+            $('#tex_type').val('no');
+            break;
+          case 'type2':
+            $('#fea_type').val('colorSpatial');
+            $('#tex_type').val('no');
+            break;
+          case 'type3':
+            $('#fea_type').val('colorMap');
+            $('#tex_type').val('no');
+            break;
+          case 'type4':
+            $('#fea_type').val('color');
+            $('#tex_type').val('yes');
+            break;
+        }
         var search_url = sprintf('/search_by_image/%s/%s/%s/%s',
-          sic_type,fea_type, tex_type,image_id);
+                sic_type, $('#fea_type').val(), $('#tex_type').val(), image_id);
         window.location = search_url;
         return false;
-      });
-
-      /* Make the request for the palette query histogram and image results. */
-      var display_results = function(json_data) {
+      })
+        function display_results(json_data,num) {
+        // note: sprintf does not work in the below line
+        var num = parseInt(num);
         {% include 'display_images.js' %}
       }
-      var search_url = sprintf(
-        '/search_by_image_json/%s/%s/%s/%s', sic_type,fea_type,tex_type,image_id);
-      $.getJSON(search_url, success=display_results);
+        $('#page1').addClass("active")
+        var search_url = sprintf(
+                '/search_by_image_json/%s/%s/%s/%s', sic_type,fea_type,tex_type,image_id);
+
+        $.getJSON(search_url,
+                function (result) {
+                    display_results(result, '1')
+                }
+        );
+        $('.page').click(function (event) {
+            var newAbsolutePage = this.innerHTML;
+            $(this).parent().siblings().removeClass("active");
+            $(this).parent().addClass("active");
+            $.getJSON(search_url,
+                    function (json_data) {
+                        display_results(json_data, newAbsolutePage);
+                    })
+        });
+
+
+
     });
   </script>
-</body>
-</html>
+{{ moment.include_moment() }}
+{% endblock %}

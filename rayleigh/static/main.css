@@ -152,6 +152,7 @@ div.result {
 }
 .lable h4{
   color:#FFFFFF;
+  padding:6px;
 }
 #upload_value{
    margin-top:-15px;
@@ -160,4 +161,11 @@ div.result {
 #back{
    margin-top:-15px;
    border-color:#6C6C6C;
+}
+.show_image{
+  margin-top:5px;
+  padding-bottom:0px;
+}
+#upload_image{
+    margin-top:-15px;
 }
