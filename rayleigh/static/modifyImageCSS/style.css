@@ -1,0 +1,20 @@
+body {
+  line-height: 1;
+  margin-top: 70px;
+  background: white;
+}
+.lable{
+  background-color:#3C3C3C;
+  margin-right:20px;
+  margin-top:5px;
+  margin-left:2px;
+  padding:5px;
+  border-radius:3px;
+  height:40px;
+}
+.lable h4{
+  color:#FFFFFF;
+  padding-left:30px;
+  font-size: medium;
+  margin-top:5px;
+}
