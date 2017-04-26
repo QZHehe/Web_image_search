@@ -16,7 +16,7 @@
             </div>
             <div id="show_image" class="row cf">
             </div>
-            <form id="upload_image_form" name="upload_image_form" action="/upload_image" method='post' enctype='multipart/form-data'>
+            <form id="upload_image_form" name="upload_image_form" action="/draw_image" method='post' enctype='multipart/form-data'>
                  <div>
                  <input type="hidden" id="search_by_draw_image" name="image" value="" />
                  </div>
@@ -167,6 +167,8 @@
 {% endblock %}
 {% block scripts %}
 {{ super() }}
+<script src="/static/jquery-1.8.3.js"></script>
+<script src="/static/sprintf-0.7-beta1.js"></script>
 <link href="/static/main.css" media="all" rel="stylesheet" type="text/css"/>
 <script src="/static/drawImageJS/jquery.js"></script>
 <script src="/static/drawImageJS/jquery.bigcolorpicker.js"></script>
@@ -175,9 +177,34 @@
 <script src="/static/drawImageJS/main.js"></script>
 <link rel="stylesheet" href="/static/drawImageCSS/canvas.css" type="text/css"/>
 <link rel="stylesheet" href="/static/drawImageCSS/jquery.bigcolorpicker.css" type="text/css"/>
+
+
 <script>
     $(document).ready(function () {
         // Add a simple URL query string parser to jQuery.
+        $("#upload_value").click(function () {
+            var type = $('input:radio:checked').val();
+            switch (type) {
+                case 'type1':
+                    $('#fea_type').val('color');
+                    $('#tex_type').val('no');
+                    break;
+                case 'type2':
+                    $('#fea_type').val('colorSpatial');
+                    $('#tex_type').val('no');
+                    break;
+                case 'type3':
+                    $('#fea_type').val('colorMap');
+                    $('#tex_type').val('no');
+                    break;
+                case 'type4':
+                    $('#fea_type').val('color');
+                    $('#tex_type').val('yes');
+                    break;
+            }
+            $("#upload_image_form").submit();
+        })
+
     });
 </script>
 {{ moment.include_moment() }}

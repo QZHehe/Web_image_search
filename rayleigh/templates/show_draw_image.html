@@ -1,171 +1,239 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Search draw image</title>
+<meta charset="UTF-8">
+{% extends "base.html" %}
+{% block title %}上传图像检索{% endblock %}
+{% block head %}
+{{ super() }}
   <link href="/static/main.css" media="all" rel="stylesheet" type="text/css"/>
   <script src="/static/search_by_palette.js"></script>
   <script src="/static/upload_image.js"></script>
-</head>
-<body>
-  <div id="content">
-    <!-- The left sidebar: palette selection and histogram display. -->
-    <div id="search_sidebar">
-      <hr />
-      <div id="upload_image">
-          <h3>Upload_image</h3>
-              <div id="palette_search_form_sic_types">
-                  <h3>Search Method</h3>
-                  {% for st in sic_types %}
-                  <input type="radio" name="sic_type" value="{{ st }}" {{ 'checked' if st == sic_type else '' }}>{{ st
-                  }}<br/>
-                  {% endfor %}
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row col-md-3">
+        <div>
+            <div id="show_upload_image">
+            </div>
+        </div>
+        <div id="upload_image">
+            <form id="upload_image_form" name="upload_image_form" action="/draw_image" method='post' enctype='multipart/form-data'>
+                <input id="uploadImage" type="hidden" name="image"/></td>
 
-                  <h3>Palette Smoothing</h3>
-                  {% for s in sigmas %}
-                  <input type="radio" name="sigma" value={{ s }} {{ 'checked' if s == sigma else '' }}>{{ s }}<br/>
-                  {% endfor %}
+                <div id="palette_search_form_sic_types">
+                    <div class="list-group">
+                        <a  id="lable1" class="list-group-item active ">
+                            <div class="row tag">
+                            <h1 class="list-group-item-heading ">
+                                选择检索方式
+                            </h1>
+                            </div>
+                        </a>
+                            <a id="lable2"class="list-group-item active ">
+                            <div class="row tag">
+                            <h4 class="list-group-item-heading ">
+                                颜色比例（不包含空间关系）
+                            </h4>
+                            </div>
+                        </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                颜色比例
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type1" checked="checked"/>
+                            </div>
+                        </a>
+                        <a  id="lable3" class="list-group-item active">
+                            <div class="row tag">
+                            <h4 class="list-group-item-heading ">
+                                颜色比例（包含空间关系）
+                            </h4>
+                            </div>
+                        </a>
+                        <a class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式一：偏重颜色相似
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type2" checked="checked"/>
+                            </div>
+                        </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式二：偏重分布相似
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type3" checked="checked"/>
+                            </div>
+                        </a>
+                        <a id="lable4" class="list-group-item active">
+                            <div class="row tag">
+                            <h4 class="list-group-item-heading ">
+                                结合颜色与纹理
+                            </h4>
+                            </div>
+                        </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式一
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type4" checked="checked"/>
+                            </div>
+                        </a>
+                    </div>
+                    <input type="hidden" name="sic_type" value = "Euclidean, sigma=16, CKDTree"/>
+                    <input type="hidden" name="sigma" value = '16'/>
+                    <input type="hidden" id='fea_type' name="fea_type"/>
+                    <input type="hidden" id='tex_type' name="tex_type"/>
+                </div>
+                <div class="row col-md-3 ">
+                <input id='back' class="btn btn-inverse" type="button" value="返回绘图页面"/>
+                </div>
+                <div class="row col-md-offset-7 ">
+                <input id='upload_value' class="btn btn-inverse" type="button" value="检索图像"/>
+                </div>
+            </form>
+        </div>
 
-                  <h3>Feature</h3>
-                  {% for f in features %}
-                  <input type="radio" name="fea_type" value="{{ f }}" {{ 'checked' if f == fea_type else '' }}>{{ f
-                  }}<br/>
-                  {% endfor %}
-
-                  <h3>Texture</h3>
-                  {% for t in texture %}
-                  <input type="radio" name="tex_type" value="{{ t }}" {{ 'checked' if t == tex_type else '' }}>{{ t
-                  }}<br/>
-                  {% endfor %}
-
-
-              </div>
-      </div>
-      <div>
-          <div id="show_upload_image">
-          </div>
-      </div>
-      <div id="palette_histogram">
-        <h3>Palette histogram</h3>
-        <div id="palette_query"></div>
-      </div>
-      <div>
-          <a href="/search_by_drawing">Seach by draw image</a>
-      </div>
-      <div>
-          <a href="/search_by_upload">Seach by upload image</a>
-      </div>
-      <div>
-          <a href="/search_by_palette">Seach by palette</a>
-      </div>
-      <div>
-          <a href="/main">图片分享区</a>
-      </div>
+        <div id="palette_histogram">
+            <div id="palette_query"></div>
+        </div>
     </div>
-
-    <!-- Main area: returned images. -->
-    <div id="images">
-      <h3>Matching images</h3>
-      <div id="results">
-      </div>
+    <div id="results" class="row col-md-9">
     </div>
-  </div>
+</div>
+<div class="container navbar-fixed-bottom">
+    <div class="row">
+        <div class="col-md-offset-6">
+            <ul class="pagination ">
+                <li id='page1'><a href="#" class="page" name="1" >1</a></li>
+                <li><a href="#" class="page" name="2" >2</a></li>
+                <li><a href="#" class="page" name="3" >3</a></li>
+                <li><a href="#" class="page" name="4" >4</a></li>
+                <li><a href="#" class="page" name="5" >5</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
   <script src="/static/jquery-1.8.3.js"></script>
   <script src="/static/sprintf-0.7-beta1.js"></script>
-  <script>
-    $(document).ready(function() {
-      // Add a simple URL query string parser to jQuery.
-      $.urlParam = function (name){
-        var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        if (!results) { return 0; }
-        return results[1] || 0;
-      }
-
-      // Add form submission JS.
-      $('#palette_search_form').submit(function() {
-        var sic_type = $("#palette_search_form input[name='sic_type']:checked").val();
-        var sigma = $("#palette_search_form input[name='sigma']:checked").val();
-        var colors = $('#palette_search_form_hidden_colors').serialize();
-        var values = getValues();
-        values=encodeURIComponent(values.join(","));
-        var search_url = sprintf('/search_by_palette/%s/%s?%s&values=%s',
-          sic_type, sigma, colors,values);
-        window.location = search_url;
-        return false;
-      });
-      // upload image
-      $('#upload_image_form').submit(function() {
-//        var sic_type = $("#palette_search_form input[name='sic_type']:checked").val();
-//        var sigma = $("#palette_search_form input[name='sigma']:checked").val();
-//        var search_url = sprintf('/upload_image/%s/%s',
-//          sic_type, sigma);
-//        window.location = search_url;
-//        return false;
-
-      });
-      // Prepare the color palette search form.
-      var sic_type = "{{ sic_type }}";
-      var sigma = "{{ sigma }}";
-      var fea_type = "{{fea_type}}";
-      var tex_type = "{{tex_type}}";
-      var colors ="{{ colors }}" || {};
-      var color_hist ="{{ color_hist}}" ||{};
-      var hash = "{{hash}}" ||{};
-      var color_map = "{{color_map}}" ||{};
-      var spa_color_hist = "{{spa_color_hist}}";
-      var show_image="{{show_image}}}" || {};
-      var dui="{{dui|safe}}" ||"";
-      if (dui !== "" ) {
-        $('#show_upload_image').html(
-          '<img width="100px" src='+dui+ ' />'
-        );
-      }
-
-      colors_str = Object.keys(colors).join(',');
-      $('#palette_search_form_hidden_colors').val(colors_str);
-      // Add selected colors lable
-      addShowSelectedColors(("{{ colors }}" || {}));
-      // Display the initial selected colors.
-      $.each(colors, function(key, val) {
-        document.getElementById(key).setAttribute('class', 'selected');
-      });
-
-      // Add selection toggles to all the colors in the palette.
-      // Selection toggles update the UI and set the hidden 'colors' input field.
-      var toggleSelected = function(event) {
-        if (this.getAttribute('class') == 'selected') {
-          delete(colors[this.id]);
-          this.setAttribute('class', '');
-          deleteShowSelectedColor(this);
-        } else {
-          colors[this.id] = 1;
-          this.setAttribute('class', 'selected');
-          addShowSelectedColor(this);
+<script>
+    $(document).ready(function () {
+        // Add a simple URL query string parser to jQuery.
+        $.urlParam = function (name) {
+            var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+            if (!results) {
+                return 0;
+            }
+            return results[1] || 0;
         }
-        colors_str = Object.keys(colors).join(',');
-        $('#palette_search_form_hidden_colors').val(colors_str);
-      };
-      $('a').each(function(i,el) {
-        el.onclick = toggleSelected;
-      });
-      // Make the request for the palette query histogram and image results.
-      var display_results = function(json_data) {
-        // note: sprintf does not work in the below line
-        $('#palette_query').html(
-          '<img width="240px" src="data:image/png;base64,' + json_data['pq_hist'] + '" />'
-        );
+        var sic_type = "Euclidean, sigma=16, CKDTree";
+        var sigma = "16";
+        var fea_type = "{{fea_type}}";
+        var tex_type = "{{tex_type}}";
+        var color_hist = "{{ color_hist}}" || {};
+        var spa_color_hist = "{{spa_color_hist}}";
+        var hash = "{{hash}}" || {};
+        var color_map = "{{color_map}}" || {};
+        var show_image = "{{show_image}}}" || {};
+        var dui = "{{dui|safe}}" || "";
+        if (dui !== "") {
+            $('#show_upload_image').html(
+                    '<div class="row lable"><h4>绘制图像</h4></div><div class="col-md-offset-1"><img width="200px" src=' + dui + ' /></div>'
+            );
+            $("#uploadImage").attr("value",dui);
 
+        }
+        var check_type = fea_type+tex_type;
+        switch(check_type){
+            case 'colorno':
+                $("input[name='search_type'][value='type1']").attr("checked",true);
+                break;
+            case 'colorSpatialno':
+                $("input[name='search_type'][value='type2']").attr("checked",true);
+                break;
+            case 'colorMapno':
+                $("input[name='search_type'][value='type3']").attr("checked",true);
+                break;
+            case 'coloryes':
+                $("input[name='search_type'][value='type4']").attr("checked",true);
+                break;
+        }
+        $("#upload_value").click(function(){
+            var type = $('input:radio:checked').val();
+            switch (type) {
+                case 'type1':
+                    $('#fea_type').val('color');
+                    $('#tex_type').val('no');
+                    break;
+                case 'type2':
+                    $('#fea_type').val('colorSpatial');
+                    $('#tex_type').val('no');
+                    break;
+                case 'type3':
+                    $('#fea_type').val('colorMap');
+                    $('#tex_type').val('no');
+                    break;
+                case 'type4':
+                    $('#fea_type').val('color');
+                    $('#tex_type').val('yes');
+                    break;
+            }
+            $("#upload_image_form").submit();
+        })
+        function display_results(json_data,num) {
+        // note: sprintf does not work in the below line
+        var num = parseInt(num);
+        $('#palette_query').html(
+
+          '<div class="row lable"><h4>上传图像颜色直方图</h4></div><img width="240px" src="data:image/png;base64,' + json_data['pq_hist'] + '" />'
+        );
         {% include 'display_images.js' %}
       }
-      var search_url = sprintf(
-        '/upload_image_json/%s/%s/%s/%s', sic_type,fea_type,tex_type,sigma);
-      $.getJSON(search_url, data = {
-          'color_hist': color_hist,
-          'hash' : hash,
-          'color_map':color_map,
-          'spa_color_hist':spa_color_hist
-              },
-          success=display_results);
+        $('#page1').addClass("active")
+        var search_url = sprintf(
+                '/upload_image_json/%s/%s/%s/%s',sic_type, fea_type, tex_type,sigma);
+
+        $.getJSON(search_url, data = {
+                    'color_hist': color_hist,
+                    'hash': hash,
+                    'color_map': color_map,
+                    'spa_color_hist': spa_color_hist
+                },
+                function (result) {
+                    display_results(result, '1')
+                }
+        );
+        $('.page').click(function (event) {
+            var newAbsolutePage = this.innerHTML;
+            $(this).parent().siblings().removeClass("active");
+            $(this).parent().addClass("active");
+            $.getJSON(search_url, data = {
+                        'color_hist': color_hist,
+                        'hash': hash,
+                        'color_map': color_map,
+                        'spa_color_hist': spa_color_hist
+                    },
+                    function (json_data) {
+                        display_results(json_data, newAbsolutePage);
+                    })
+        });
+        $('#back').click(function (event) {
+            window.location.href='/search_by_drawing'
+        });
+
     });
-  </script>
-</body>
-</html>
+</script>
+{{ moment.include_moment() }}
+{% endblock %}
