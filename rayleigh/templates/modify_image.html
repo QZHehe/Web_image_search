@@ -3,6 +3,7 @@
 {% block title %}颜色修正{% endblock %}
 {% block head %}
 {{ super() }}
+
 	<link type="text/css" rel="stylesheet" href="/static/modifyImageCSS/materialize.min.css" media="screen,projection" />
 	<link type="text/css" rel="stylesheet" href="/static/modifyImageCSS/style_user.css" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,6 +16,11 @@
 		<div class="row lable"><h4>检索结果图像</h4></div>
         <img width="200px" src="{{image_url}}"/>
       </div>
+	  <div class="col-md-offset-1 show_image" style="margin-top: 20px">
+		<div class="row lable"><h4>保存修正结果</h4></div>
+        <a href="#" download="picture.png" id="downloadImage_a"><input id="click_download" type="button" class="downloadImage" value="下载"/></a>
+      </div>
+
 	</div>
 	<div class="row col-md-9">
 		<div class="row col-md-offset-8" style="margin-left:80px">
@@ -57,10 +63,16 @@
 	var canv, file, ctx;
 	var img_raw, width, height;
 	$(document).ready(function () {
+		$("#click_download").click(function () {
+			canvas =  document.getElementById("source_image");
+//			alert(canvas.toDataURL());
+			$("#downloadImage_a")[0].href = canvas.toDataURL();
+		})
 		$('.materialboxed').materialbox();
 		$('.modal-trigger').leanModal();
 
 	});
+
 	function uploadFile(e) {
 		//Materialize.toast('PROCESSING...', 200);
 		var file = e.target.files[0];
