@@ -86,6 +86,16 @@
                             <input type="radio" name="search_type" value="type4" checked="checked"/>
                             </div>
                         </a>
+                        <a  class="list-group-item ">
+                            <div class="row col-md-11 tag">
+                            <h4 class="list-group-item-heading ">
+                                方式二
+                            </h4>
+                            </div>
+                            <div class="row row col-md-offset-11 tag">
+                            <input type="radio" name="search_type" value="type5" checked="checked"/>
+                            </div>
+                        </a>
                     </div>
                     <input type="hidden" name="sic_type" value = "Euclidean, sigma=16, CKDTree"/>
                     <input type="hidden" name="sigma" value = '16'/>
@@ -150,6 +160,9 @@
             case 'coloryes':
                 $("input[name='search_type'][value='type4']").attr("checked",true);
                 break;
+            case 'colorcnn':
+                $("input[name='search_type'][value='type5']").attr("checked",true);
+                break;
         }
       $("#upload_value").click(function(){
         var type = $('input:radio:checked').val();
@@ -169,6 +182,10 @@
           case 'type4':
             $('#fea_type').val('color');
             $('#tex_type').val('yes');
+            break;
+          case 'type5':
+            $('#fea_type').val('color');
+            $('#tex_type').val('cnn');
             break;
         }
         var search_url = sprintf('/search_by_image/%s/%s/%s/%s',
