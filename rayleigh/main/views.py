@@ -376,7 +376,7 @@ def edit_profile_admin(id):
         collection_user.User.update({'email': user_temp.email}, {'$set': {'role': form.role.data}})
         collection_user.User.update({'email': user_temp.email}, {'$set': {'location': form.location.data}})
         collection_user.User.update({'email': user_temp.email}, {'$set': {'about_me': form.about_me.data}})
-        flash('The profile has been updated.')
+        flash('个人资料修改成功')
         return redirect(url_for('.user', username=user_temp.username))
     form.email.data = user_temp.email
     form.username.data = user_temp.username

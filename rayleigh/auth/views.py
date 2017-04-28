@@ -48,7 +48,7 @@ def login():
             login_user(user, form.remember_me.data)
             collection_user.User.update({'email': form.email.data}, {'$set': {'last_since': datetime.utcnow()}})
             return redirect(request.args.get('next') or url_for('main.index'))
-        flash('Invalid username or password.')
+        flash('用户名或密码无效')
     return render_template('auth/login.html', form=form)
 
 
@@ -56,7 +56,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.')
+    flash('您已退出登录')
     return redirect(url_for('main.index'))
 
 
@@ -78,7 +78,7 @@ def register():
         token = temp.generate_confirmation_token
         send_email(temp.email, 'Confirm Your Account',
                    'auth/temp/confirm', user=temp, token=token)
-        flash('A confirmation temp has been sent to you by temp.')
+        flash('验证邮件已发送至您邮箱，请前往邮箱验证～')
         return redirect(url_for('auth.login'))
     return render_template('auth/register.html', form=form)
 
@@ -95,13 +95,13 @@ def confirm(token):
     id = data.get('confirm')
     user = collection_user.User.find_one({'_id': ObjectId(id)})
     if user is None:
-        flash('The confirmation link is invalid or has expired.')
+        flash('该验证链接无效或已过期～')
     if user.get('activate'):
-        flash('this Account is already confirm')
+        flash('该帐号已验证～')
         return redirect(url_for('main.index'))
     collection_user.User.update({'_id': ObjectId(id)}, {'$set': {'activate': True}})
     time.sleep(1)
-    flash('You have confirmed your account. Thanks!')
+    flash('恭喜您验证成功～')
     return redirect(url_for('main.index'))
 
 
@@ -111,7 +111,7 @@ def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, 'Confirm Your Account',
                'auth/temp/confirm', user=current_user, token=token)
-    flash('A new confirmation temp has been sent to you by temp.')
+    flash('新的验证邮件已发送至您邮箱，请前往邮箱验证～')
     return redirect(url_for('main.index'))
 
 
@@ -123,7 +123,7 @@ def password_reset_request():
         token = generate_reset_password_confirmation_token(email=email)
         send_email(email, 'Reset Your Password',
                    'auth/temp/reset_password', token=token)
-        flash('A reset password temp has been sent to you by temp.')
+        flash('修改密码的验证邮件已发送至您邮箱，请前往邮箱验证～')
         return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)
 
@@ -140,13 +140,13 @@ def password_reset(token):
     email = data.get('password_reset')
     user = collection_user.User.find_one({'email': email})
     if user is None:
-        flash('The confirmation link is invalid or has expired.')
+        flash('该验证链接无效或已过期～')
         time.sleep(3)
         return redirect(url_for('main.index'))
     if form.validate_on_submit():
         password = encrypt_passowrd(form.password.data)
         collection_user.User.update({'email': email}, {'$set': {'password': password}})
-        flash('Change Success,you can now login.')
+        flash('修改成功，您可以重新登录～')
         return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)
 
@@ -157,12 +157,12 @@ def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
         if not verify_password(current_user.password_hash, form.old_password.data):
-            flash('old password is not correct')
+            flash('原始密码错误')
             form.data.clear()
         else:
             password = encrypt_passowrd(form.password.data)
             collection_user.User.update({'email': current_user.email}, {'$set': {'password': password}})
-            flash('Change Success,you can now login.')
+            flash('修改成功，您可以重新登录')
             return redirect(url_for('auth.login'))
     return render_template('auth/change_password.html', form=form)
 
@@ -177,7 +177,7 @@ def change_email_request():
         token = generate_change_email_confirmation_token(email=current_user.email)
         send_email(email, 'Reset Your Password',
                    'auth/temp/change_email', user=current_user, token=token)
-        flash('A confirm temp has been sent to you by temp.')
+        flash('验证邮件已发送至您邮箱，请前往邮箱验证～')
         return redirect(url_for('main.index'))
     return render_template('auth/change_email_request.html', form=form)
 
@@ -196,5 +196,5 @@ def change_email(token):
         '$set': {'email': email_temp}})
     collection_user.User.update({'email': email_temp}, {'$unset': {'email_temp': email_temp}})
     logout_user()
-    flash('Your e-mail successfully changed, please sign in again.')
+    flash('您的邮箱地址修改成功，请重新登录')
     return redirect(url_for('auth.login'))
