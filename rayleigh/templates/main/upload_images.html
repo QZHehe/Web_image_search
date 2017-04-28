@@ -3,11 +3,29 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "main/_macros.html" as macros %}
 
-{% block title %}INnoVation的小站-主页{% endblock %}
+{% block title %}批量管理{% endblock %}
 
 {% block page_content %}
+<style>
+/*.build_index{*/
+    /*display: block;*/
+    /*border:1px solid #CCC;*/
+    /*border-radius:6px;*/
+    /*background: #9C9d9e;*/
+    /*margin-top:20px;*/
+    /*width:150px;*/
+    /*text-align:center;*/
+/*}*/
+.build_index a{
+    font-size:18px;
+    /*display:block;*/
+    /*color:#ffffff;*/
+    /*padding:3px;*/
+}
+</style>
+<div class="container">
     <div class="page-header">
-        <h1>你好, 您可以批量上传图片{% if current_user.is_authenticated %}{{ current_user.username }}{% else %}游客{% endif %}!</h1>
+        <h1>你好, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}游客{% endif %},您可以批量上传图片!</h1>
     </div>
     <div>
 
@@ -22,25 +40,28 @@
 
              {{ form.submit }}
         </form>
-        <h3>新增 {{ num }} 张图片</h3>
-        <a href="{{ url_for('.buildindexes') }}">构建索引</a>
+        <div class="row">
+            <div class="col-md-2">
+                <h3>新增 {{ num }} 张图片</h3>
+            </div>
+            <div class="col-md-4 build_index" style="margin-top: 15px;">
+                <a class="btn btn-default" href="{{ url_for('.buildindexes') }}" style="">构建索引</a>
+            </div>
+        </div>
         {% endif %}
     </div>
     <div class="post-tabs">
         <ul class="nav nav-tabs">
-            <li{% if not show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_all') }}">所有文章</a></li>
-            {% if current_user.is_authenticated %}
-                <li{% if show_followed %} class="active"{% endif %}><a
-                        href="{{ url_for('.show_followed') }}">关注的人</a></li>
-            {% endif %}
+            <li{% if not show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_all') }}">所有图片</a></li>
         </ul>
-        {% include 'main/_posts_sim.html' %}
+        {% include 'main/_posts.html' %}
     </div>
     {% if pagination %}
         <div class="pagination">
             {{ macros.pagination_widget(pagination, '.upload_images') }}
         </div>
     {% endif %}
+</div>
 {% endblock %}
 
 {% block scripts %}
