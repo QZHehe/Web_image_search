@@ -16,6 +16,7 @@ import cPickle
 from collection import collection_image ,collection_user
 import util
 from palette import Palette
+import numpy as np
 
 def generate_reset_password_confirmation_token(email, expiration=3600):
     s = Serializer(current_app.config['SECRET_KEY'], expiration)
@@ -201,11 +202,13 @@ class PostImage:
         # self.body_html = body_html(self.body)
         img = ImageMongo(self.body)
         hash = img.get_texture()
+        cnn_feature = np.array(np.ones(1000))
         color_map = img.spatial_color_map_feature(palette).tolist()
         hist = util.histogram_colors_smoothed(img.lab_array, palette,sigma=16,direct=False)
         spatial = img.get_spatial_features()
         bson_hist = Binary(cPickle.dumps(hist, protocol=2))
         bson_spa_hist=Binary(cPickle.dumps(spatial, protocol=2))
+        bson_cnn_feature=Binary(cPickle.dumps(cnn_feature, protocol=2))
 
         img.as_dict().items()
 
@@ -218,6 +221,8 @@ class PostImage:
             'hist': bson_hist,
             'spa_hist': bson_spa_hist,
             'color_map': color_map,
+            'hash': hash,
+            'cnn_feature':bson_cnn_feature,
             'describe': self.text,
             'comments':[],
             'index': False,

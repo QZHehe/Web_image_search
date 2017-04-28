@@ -21,20 +21,20 @@ class Paginate:
             if show_all == 0:
                 self.posts = []
                 # posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
-                posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING).limit(2000)
-                for pos in posts:
-                    self.posts.append(pos)
-                self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
+                posts = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0,'cnn_feature':0,'hash':0}).sort('issuing_time', DESCENDING)
+                # for pos in posts:
+                #     self.posts.append(pos)
+                # self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
             if show_all == 1:
                 self.posts = []
-                posts = collection_image.find({},{'spa_hist':0,'color_map':0,'hist':0})
-                for pos in posts:
-                    self.posts.append(pos)
-                self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
+                posts = collection_image.find({'show':False},{'spa_hist':0,'color_map':0,'hist':0,'cnn_feature':0,'hash':0}).sort('issuing_time', DESCENDING)
+                # for pos in posts:
+                #     self.posts.append(pos)
+                # self.posts.sort(key=lambda self.total - (20 * (page - 1))x: x.get('issuing_time'), reverse=True)
             self.total = posts.count(True)
 
         if show_follow == 1:
-            self.posts = []
+            posts = []
             following = collection_user.User.find_one({'username': current_user.username}).get('following')
             # image = collection_image.find({'show': True},{'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
             # following.append([current_user.username, 'date'])
@@ -47,11 +47,12 @@ class Paginate:
             # image = collection_image.find({'show': True}, {'spa_hist': 0, 'color_map': 0, 'hist': 0}).sort(
             #     'issuing_time', DESCENDING)
             for i in range(following.__len__()):
-                posts = collection_image.find({'username': following[i][0], 'show': True},{'spa_hist':0,'color_map':0,'hist':0})
-                for pos in posts:
-                    self.posts.append(pos)
-            self.posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
-            self.total = self.posts.__len__()
+                posts_1 = collection_image.find({'show': True,'username': following[i][0]},{'spa_hist':0,'color_map':0,'hist':0,'cnn_feature':0,'hash':0}).sort('issuing_time', DESCENDING)
+            #     for pos in posts:
+            #         self.posts.append(pos)
+                posts.extend(posts_1)
+            posts.sort(key=lambda x: x.get('issuing_time'), reverse=True)
+            self.total = posts.__len__()
         self.pages = int(self.total / 20)
         if self.total % 20 != 0:
             self.pages += 1
@@ -72,7 +73,7 @@ class Paginate:
             self.current_num = 20
         self.item = []
         for i in range(self.current_num):
-            self.item.append(self.posts[self.prev_num * 20 + i])
+            self.item.append(posts[self.prev_num * 20 + i])
 
     def iter_pages(self, left_edge=2, left_current=2,
                    right_current=5, right_edge=2):
@@ -89,7 +90,7 @@ class Paginate:
 
 class PaginateUser:
     def __init__(self, page, username):
-        posts = collection_image.find({'username': username}, {'spa_hist':0,'color_map':0,'hist':0}).sort('issuing_time', DESCENDING)
+        posts = collection_image.find({'show': True,'username': username}, {'spa_hist':0,'color_map':0,'hist':0,'cnn_feature':0,'hash':0}).sort('issuing_time', DESCENDING)
         self.total = posts.count()
         self.pages = int(self.total / 20)
         if self.total % 20 != 0:
@@ -388,8 +389,9 @@ def edit_profile_admin(id):
 
 
 @main.route('/post/<id>', methods=['GET', 'POST'])
+@login_required
 def post(id):
-    post = collection_image.find({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0})
+    post = collection_image.find({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0,'cnn_feature':0,'hash':0})
     form = CommentForm()
     if form.validate_on_submit():
         comments = post[0].get('comments')
@@ -409,7 +411,7 @@ def post(id):
 @main.route('/edit/<id>', methods=['GET', 'POST'])
 @login_required
 def edit(id):
-    post = collection_image.find_one({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0})
+    post = collection_image.find_one({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0,'cnn_feature':0,'hash':0})
     if current_user.id != post.get('user_id') and \
             not current_user.can(Permission.ADMINISTER):
         abort(403)
@@ -536,7 +538,7 @@ def show_followed():
 @main.route('/delete/<id>')
 @login_required
 def delete(id):
-    user = collection_image.find({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0})
+    user = collection_image.find({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0,'cnn_feature':0,'hash':0})
     if not current_user.username == user[0].get('username') and not current_user.is_administrator():
         abort(304)
     timedata = request.args.get('data')
@@ -554,7 +556,7 @@ def delete(id):
 @main.route('/deletepost/<id>')
 @login_required
 def deletepost(id):
-    post = collection_image.find({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0})
+    post = collection_image.find({'_id': ObjectId(id)},{'spa_hist':0,'color_map':0,'hist':0,'cnn_feature':0,'hash':0})
     if not current_user.username == post[0].get('username') and not current_user.is_administrator():
         abort(304)
     root = os.path.dirname(os.path.dirname(__file__))
