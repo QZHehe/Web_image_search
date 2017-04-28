@@ -27,7 +27,7 @@
                 <ul class="nav navbar-nav navbar-right">
                     {% if current_user.is_administrator() %}
                     <li><a href="/static/file/test.rar" download="download_image.zip">图片下载工具</a></li>
-                    <li><a href="{{ url_for('.upload_images') }}">批量管理</a></li>
+                    <li><a href="/main/upload_images">批量管理</a></li>
                     {% endif %}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">

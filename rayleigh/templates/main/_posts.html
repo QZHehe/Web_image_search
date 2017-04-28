@@ -58,11 +58,15 @@
 </div>
 <script type="text/javascript" src="/static/zoomimage.js"></script>
 <script type="text/javascript" src="/static/jquery-1.8.3.js"></script>
+{% if current_user.is_authenticated %}
 <script>
-	$(function(){
-		$(".pimg").click(function(){
-			var _this = $(this);//将当前的pimg元素作为_this传入函数
-			imgShow("#outerdiv", "#innerdiv", "#bigimg", _this);
-		});
-	});
+
+    $(function () {
+        $(".pimg").click(function () {
+            var _this = $(this);//将当前的pimg元素作为_this传入函数
+            imgShow("#outerdiv", "#innerdiv", "#bigimg", _this);
+        });
+    });
+
 </script>
+{% endif %}
