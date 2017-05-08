@@ -397,4 +397,4 @@ def modify_image(sic_type,image_id):
         'modify_image.html', image_url=img.dui)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

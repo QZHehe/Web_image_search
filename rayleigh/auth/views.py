@@ -75,7 +75,8 @@ def register():
                     password=user.get('password'), activate=False, role=user.get('role'), name=user.get('name'),
                     location=user.get('location'), about_me=user.get('about_me'), last_since=user.get('last_since'),
                     member_since=user.get('member_since'))
-        token = temp.generate_confirmation_token
+        token = temp.generate_confirmation_token()
+        # token = token.encode('gbk')
         send_email(temp.email, 'Confirm Your Account',
                    'auth/temp/confirm', user=temp, token=token)
         flash('验证邮件已发送至您邮箱，请前往邮箱验证～')
