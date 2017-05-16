@@ -728,10 +728,10 @@ class SearchableImageCollectionCKDTree(SearchableImageCollection):
         self.p = self.Ps[self.distance_metric]
         tt.toc('build_index_ckdtree')
 
-        tt.tic('build_spatial_index_ckdtree')
-        self.spa_ckdtree = cKDTree(self.spa_hists_reduced, self.LEAF_SIZE)
-        self.spa_p = self.Ps[self.distance_metric]
-        tt.toc('build_spatial_index_ckdtree')
+        # tt.tic('build_spatial_index_ckdtree')
+        # self.spa_ckdtree = cKDTree(self.spa_hists_reduced, self.LEAF_SIZE)
+        # self.spa_p = self.Ps[self.distance_metric]
+        # tt.toc('build_spatial_index_ckdtree')
         return self
 
     def nn_ind(self, color_hist, num, feature):

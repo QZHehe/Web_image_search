@@ -11,7 +11,7 @@ from bson.objectid import ObjectId
 from datetime import datetime
 import os
 from collection import collection_image ,collection_user, ImageCollection
-from searchable_collection import SearchableImageCollectionFLANN
+from searchable_collection import SearchableImageCollectionCKDTree
 from palette import Palette
 
 
@@ -578,10 +578,24 @@ def buildindexes():
         os.remove(path + '/data' + '/' + file)
     flash('删除成功')
     # 构建索引
+    # image_list_name = 'test1'
+    # algorithm = 'flann'
+    # sic_class = SearchableImageCollectionFLANN
+    # distance_metric = 'euclidean'
+    # sigma = 16
+    # num_dimensions = 0
+    # filename = os.path.join(path + '/data' + '/', '{}_{}_{}_{}_{}.pickle'.format(
+    #     image_list_name, algorithm, distance_metric, sigma, num_dimensions))
+    # palette = Palette(num_hues=10, sat_range=2, light_range=3)
+    # ic = ImageCollection(palette)
+    # sic = sic_class(ic, distance_metric, sigma, num_dimensions)
+    # sic.save(filename)
+    # flash('构建索引成功')
     image_list_name = 'test1'
-    algorithm = 'flann'
-    sic_class = SearchableImageCollectionFLANN
+    algorithm = 'CKDTree'
+    sic_class = SearchableImageCollectionCKDTree
     distance_metric = 'euclidean'
+    # distance_metric = 'manhattan'
     sigma = 16
     num_dimensions = 0
     filename = os.path.join(path + '/data' + '/', '{}_{}_{}_{}_{}.pickle'.format(
@@ -590,5 +604,4 @@ def buildindexes():
     ic = ImageCollection(palette)
     sic = sic_class(ic, distance_metric, sigma, num_dimensions)
     sic.save(filename)
-    flash('构建索引成功')
     return redirect(url_for('.upload_images'))
